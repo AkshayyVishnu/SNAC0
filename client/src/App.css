@@ -98,9 +98,15 @@
   min-width: 0;
   max-width: 0;
   padding: 0;
-  overflow: hidden;
   margin: 0;
   border: none;
+  overflow: hidden;
+  flex: 0;
+}
+
+.app-container.sidebar-hidden .map-container {
+  width: 100%;
+  transition: width 0.3s ease;
 }
 
 @media (max-width: 768px) {

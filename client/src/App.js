@@ -99,7 +99,7 @@ function App() {
           </button>
         </div>
       </header>
-      <div className="app-container">
+      <div className={`app-container ${isPanelOpen ? '' : 'sidebar-hidden'}`}>
         {isPanelOpen && isMobile && (
           <div 
             className="sidebar-overlay"
@@ -126,8 +126,9 @@ function App() {
             onMapClickCallbackChange={setOnMapClickCallback}
           />
         </div>
-        <MapComponent
-          routes={routes}
+        <div style={{ flexGrow: 1 }}>
+          <MapComponent
+            routes={routes}
           selectedRoute={selectedRoute}
           onRouteSelect={setSelectedRoute}
           isDrawingMode={isDrawingRoute}
@@ -137,6 +138,7 @@ function App() {
           places={places}
           onPlaceSelect={setSelectedPlace}
         />
+      </div>
         {selectedPlace && (
           <PlaceDetails
             place={selectedPlace}
