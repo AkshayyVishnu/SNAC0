@@ -88,7 +88,7 @@ const NavigationPanel = ({ onRouteCalculate, onClear }) => {
       }
       
       // Clear navigation mode
-      window.setNavLocation = null;
+      //window.setNavLocation = null;
       window.setNavLocationType = null;
     };
     

@@ -39,6 +39,8 @@ const RouteForm = ({ route, onSave, onCancel, onDrawingModeChange, onMapClickCal
   }, [isDrawing, onMapClickCallbackChange, onDrawingModeChange]);
 
   const handleAddWaypointFromMap = (latitude, longitude) => {
+    console.log('Map Clicked! Received Coords:', { lat: latitude, lng: longitude });
+
     setFormData(prev => ({
       ...prev,
       waypoints: [

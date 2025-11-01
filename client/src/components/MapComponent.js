@@ -656,7 +656,7 @@ const MapComponent = ({
                 'line-cap': 'round'
               },
               paint: {
-                'line-color': '#667eea',
+                'line-color': '#05f7ff',
                 'line-width': 6,
                 'line-opacity': 0.8
               }
