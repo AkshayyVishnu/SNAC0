@@ -6,9 +6,8 @@ const PlaceCategorizer = ({ onPlaceSelect }) => {
   const [places, setPlaces] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
   const [editingPlace, setEditingPlace] = useState(null);
-  const [isPopulating, setIsPopulating] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [isCollectingPlaces, setIsCollectingPlaces] = useState(false);
   const [collectedPlaces, setCollectedPlaces] = useState([]);
 
@@ -46,71 +45,6 @@ const PlaceCategorizer = ({ onPlaceSelect }) => {
     }
   };
 
-  const handlePlaceSaved = () => {
-    setIsCreating(false);
-    setEditingPlace(null);
-    fetchPlaces();
-  };
-
-  const handlePopulateCollegePlaces = async () => {
-    if (!window.confirm('This will add NIT Warangal places to the database using OpenStreetMap geocoding. This may take a few minutes. Continue?')) {
-      return;
-    }
-
-    setIsPopulating(true);
-    try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/places/populate-college-places`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      const data = await response.json();
-      
-      if (response.ok) {
-        alert(`✅ ${data.message}\n\nCreated: ${data.results.success.length}\nFailed: ${data.results.failed.length}\nSkipped: ${data.results.skipped.length}`);
-        fetchPlaces(); // Refresh the places list
-      } else {
-        alert(`Error: ${data.error || 'Failed to populate places'}`);
-      }
-    } catch (error) {
-      console.error('Error populating places:', error);
-      alert('Error populating places. Please check the console.');
-    } finally {
-      setIsPopulating(false);
-    }
-  };
-
-  const handleFetchFromMapbox = async () => {
-    if (!window.confirm('This will fetch all places visible in Mapbox for your campus area and store them in the database. This may take a few minutes. Continue?')) {
-      return;
-    }
-
-    setIsPopulating(true);
-    try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/places/fetch-from-mapbox`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      const data = await response.json();
-      
-      if (response.ok) {
-        alert(`✅ ${data.message}\n\nFound: ${data.placesFound} places\nCreated: ${data.results.success.length}\nFailed: ${data.results.failed.length}\nSkipped: ${data.results.skipped.length}`);
-        fetchPlaces(); // Refresh the places list
-      } else {
-        alert(`Error: ${data.error || 'Failed to fetch places from Mapbox'}`);
-      }
-    } catch (error) {
-      console.error('Error fetching from Mapbox:', error);
-      alert('Error fetching places from Mapbox. Please check the console.');
-    } finally {
-      setIsPopulating(false);
-    }
-  };
 
   const handleStartCollectingPlaces = () => {
     if (!window.confirm('Click on places visible on the map to collect them.\n\nA prompt will ask you to enter the place name.\nClick "Save Collected Places" when done.')) {
@@ -160,7 +94,7 @@ const PlaceCategorizer = ({ onPlaceSelect }) => {
       return;
     }
 
-    setIsPopulating(true);
+    setIsSaving(true);
     try {
       // Let user edit names and categories before saving
       const placesToSave = collectedPlaces.map(place => ({
@@ -193,7 +127,7 @@ const PlaceCategorizer = ({ onPlaceSelect }) => {
       console.error('Error saving collected places:', error);
       alert('Error saving places. Please check the console.');
     } finally {
-      setIsPopulating(false);
+      setIsSaving(false);
     }
   };
 
@@ -206,17 +140,20 @@ const PlaceCategorizer = ({ onPlaceSelect }) => {
     return acc;
   }, {});
 
-  if (isCreating || editingPlace) {
+  if (editingPlace) {
     return (
       <div className="place-categorizer">
         <div className="categorizer-header">
-          <h3>{editingPlace ? 'Edit' : 'Add'} Place</h3>
-          <button onClick={() => { setIsCreating(false); setEditingPlace(null); }}>✕</button>
+          <h3>Edit Place</h3>
+          <button onClick={() => { setEditingPlace(null); }}>✕</button>
         </div>
         <PlaceForm
           place={editingPlace}
-          onSave={handlePlaceSaved}
-          onCancel={() => { setIsCreating(false); setEditingPlace(null); }}
+          onSave={() => {
+            setEditingPlace(null);
+            fetchPlaces();
+          }}
+          onCancel={() => { setEditingPlace(null); }}
         />
       </div>
     );
@@ -227,42 +164,6 @@ const PlaceCategorizer = ({ onPlaceSelect }) => {
       <div className="categorizer-header">
         <h3>🗺️ Places</h3>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          <button 
-            className="btn-populate-places" 
-            onClick={handlePopulateCollegePlaces}
-            disabled={isPopulating}
-            title="Populate college places from OpenStreetMap"
-            style={{
-              padding: '0.5rem 1rem',
-              background: isPopulating ? '#ccc' : '#4CAF50',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: isPopulating ? 'not-allowed' : 'pointer',
-              fontSize: '0.875rem',
-              fontWeight: '500'
-            }}
-          >
-            {isPopulating ? '⏳ Loading...' : '🌐 Populate Places'}
-          </button>
-          <button 
-            className="btn-fetch-mapbox" 
-            onClick={handleFetchFromMapbox}
-            disabled={isPopulating}
-            title="Fetch all places visible in Mapbox and store them"
-            style={{
-              padding: '0.5rem 1rem',
-              background: isPopulating ? '#ccc' : '#2196F3',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: isPopulating ? 'not-allowed' : 'pointer',
-              fontSize: '0.875rem',
-              fontWeight: '500'
-            }}
-          >
-            {isPopulating ? '⏳ Fetching...' : '🗺️ Fetch from Mapbox'}
-          </button>
           {!isCollectingPlaces ? (
             <button 
               onClick={handleStartCollectingPlaces}
@@ -284,20 +185,20 @@ const PlaceCategorizer = ({ onPlaceSelect }) => {
             <>
               <button 
                 onClick={handleSaveCollectedPlaces}
-                disabled={isPopulating || collectedPlaces.length === 0}
+                disabled={isSaving || collectedPlaces.length === 0}
                 style={{
                   padding: '0.5rem 1rem',
-                  background: isPopulating || collectedPlaces.length === 0 ? '#ccc' : '#4CAF50',
+                  background: isSaving || collectedPlaces.length === 0 ? '#ccc' : '#4CAF50',
                   color: 'white',
                   border: 'none',
                   borderRadius: '6px',
-                  cursor: isPopulating || collectedPlaces.length === 0 ? 'not-allowed' : 'pointer',
+                  cursor: isSaving || collectedPlaces.length === 0 ? 'not-allowed' : 'pointer',
                   fontSize: '0.875rem',
                   fontWeight: '500'
                 }}
                 title={`Save ${collectedPlaces.length} collected places`}
               >
-                💾 Save Collected ({collectedPlaces.length})
+                {isSaving ? '⏳ Saving...' : `💾 Save Collected (${collectedPlaces.length})`}
               </button>
               <button 
                 onClick={handleStopCollectingPlaces}
@@ -316,9 +217,6 @@ const PlaceCategorizer = ({ onPlaceSelect }) => {
               </button>
             </>
           )}
-          <button className="btn-add-place" onClick={() => setIsCreating(true)}>
-            + Add Place
-          </button>
         </div>
         {isCollectingPlaces && (
           <div style={{

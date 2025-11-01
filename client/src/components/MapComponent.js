@@ -20,7 +20,7 @@ const MapComponent = ({
     staff_quarters: "🏠",
     hostel: "🏘️",
     library: "📖",
-    other: "", // Changed from pin to building
+    other: "",
   },
   nRoute = null,
   onNavigationClear = null,
@@ -44,6 +44,7 @@ const MapComponent = ({
   const [showSearchSuggestions, setShowSearchSuggestions] = useState(false);
   const customSearchContainerRef = useRef(null);
   const geocoderRef = useRef(null);
+  const searchResultMarkerRef = useRef(null);
 
   useEffect(() => {
     const mapboxToken = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN;
@@ -63,11 +64,10 @@ const MapComponent = ({
         map.current = new mapboxgl.Map({
           container: mapContainer.current,
           style: "mapbox://styles/akshay-vishnu/cmhftdgs7008601pj1wv26l94",
-          center: [79.5328, 17.9808], // NIT Warangal coordinates (longitude, latitude)
+          center: [79.5328, 17.9808],
           zoom: 15,
         });
 
-        // Create custom search control container
         const customSearchContainer = document.createElement("div");
         customSearchContainer.className = "custom-map-search";
         customSearchContainer.style.position = "absolute";
@@ -79,7 +79,6 @@ const MapComponent = ({
         mapContainer.current.appendChild(customSearchContainer);
         customSearchContainerRef.current = customSearchContainer;
 
-        // Store geocoder reference for later use (for Mapbox searches)
         geocoderRef.current = {
           accessToken: mapboxToken,
           searchMapbox: async (query) => {
@@ -122,21 +121,18 @@ const MapComponent = ({
         try {
           customSearchContainerRef.current.remove();
         } catch (error) {
-          console.warn("Error removing search container:", error);
         }
       }
       if (map.current) {
         try {
           map.current.remove();
         } catch (error) {
-          console.warn("Error removing map:", error);
         }
         map.current = null;
       }
     };
   }, []);
 
-  // Handle map search - combine local places and Mapbox results
   useEffect(() => {
     const performSearch = async () => {
       if (!searchQuery || searchQuery.length < 2) {
@@ -148,7 +144,6 @@ const MapComponent = ({
       const queryLower = searchQuery.toLowerCase().trim();
       const allSuggestions = [];
 
-      // Search local places first
       const localPlaceMatches = places
         .filter((place) => {
           const nameMatch = place.name.toLowerCase().includes(queryLower);
@@ -173,7 +168,6 @@ const MapComponent = ({
 
       allSuggestions.push(...localPlaceMatches);
 
-      // Then search Mapbox
       if (geocoderRef.current && geocoderRef.current.searchMapbox) {
         try {
           const mapboxResults = await geocoderRef.current.searchMapbox(
@@ -198,21 +192,18 @@ const MapComponent = ({
       setShowSearchSuggestions(allSuggestions.length > 0);
     };
 
-    const timeoutId = setTimeout(performSearch, 300); // Debounce
+    const timeoutId = setTimeout(performSearch, 300);
     return () => clearTimeout(timeoutId);
   }, [searchQuery, places]);
 
-  // Handle search result selection
   const handleSearchSelect = useCallback((suggestion) => {
     const { lng, lat, name } = suggestion;
 
-    // If navigation mode is active, set the location
     if (window.setNavLocationType && window.setNavLocation) {
       window.setNavLocation(lng, lat, name);
       window.setNavLocationType = null;
     }
 
-    // Fly to the location
     if (map.current) {
       map.current.flyTo({
         center: [lng, lat],
@@ -220,7 +211,11 @@ const MapComponent = ({
         duration: 1500,
       });
 
-      // Create a temporary marker
+      if (searchResultMarkerRef.current) {
+        searchResultMarkerRef.current.remove();
+        searchResultMarkerRef.current = null;
+      }
+
       const el = document.createElement("div");
       el.className = "search-result-marker";
       el.style.width = "20px";
@@ -235,154 +230,169 @@ const MapComponent = ({
         .setPopup(new mapboxgl.Popup().setHTML(`<strong>${name}</strong>`))
         .addTo(map.current);
 
-      // Remove marker after 3 seconds
-      setTimeout(() => marker.remove(), 3000);
+      searchResultMarkerRef.current = marker;
     }
 
-    // Clear search
     setSearchQuery("");
     setShowSearchSuggestions(false);
   }, []);
 
-  // Render custom search UI with suggestions
   useEffect(() => {
     if (!customSearchContainerRef.current || !mapLoaded) return;
 
     const container = customSearchContainerRef.current;
-    const suggestionsHTML =
-      showSearchSuggestions && searchSuggestions.length > 0
-        ? `
-      <div id="map-search-suggestions" style="
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        margin-top: 4px;
-        background: white;
-        border: 1px solid #ddd;
-        border-radius: 6px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        z-index: 1001;
-        max-height: 300px;
-        overflow-y: auto;
-      ">
-        ${searchSuggestions
-          .map(
-            (suggestion, idx) => `
-          <div 
-            class="map-suggestion-item ${
-              suggestion.isLocal ? "local-place" : ""
-            }"
-            data-index="${idx}"
-            style="
-              padding: 0.75rem;
-              cursor: pointer;
-              border-bottom: 1px solid #f0f0f0;
-              transition: background-color 0.2s;
+    
+    if (!container.querySelector("#map-search-input")) {
+      container.innerHTML = `
+        <div style="position: relative; width: 100%;">
+          <input
+            type="text"
+            id="map-search-input"
+            placeholder="🔍 Search for places on campus..."
+            style="width: 100%; padding: 10px 15px; font-size: 14px; border: 2px solid #ddd; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); outline: none; transition: border-color 0.2s;"
+          />
+          <div id="map-search-suggestions-container"></div>
+        </div>
+      `;
+
+      const input = container.querySelector("#map-search-input");
+      if (input) {
+        input.addEventListener("input", (e) => {
+          const value = e.target.value;
+          setSearchQuery(value);
+        });
+        
+        input.addEventListener("focus", () => {
+          input.style.borderColor = "#667eea";
+        });
+        
+        input.addEventListener("blur", () => {
+          input.style.borderColor = "#ddd";
+          setTimeout(() => setShowSearchSuggestions(false), 250);
+        });
+      }
+    }
+  }, [mapLoaded]);
+
+  useEffect(() => {
+    if (!customSearchContainerRef.current || !mapLoaded) return;
+    const input = customSearchContainerRef.current.querySelector("#map-search-input");
+    if (input) {
+      const isInputFocused = document.activeElement === input;
+      const shouldSync = !isInputFocused || (searchQuery === "" && input.value !== "");
+      
+      if (shouldSync && input.value !== searchQuery) {
+        input.value = searchQuery;
+      }
+    }
+  }, [searchQuery, mapLoaded]);
+
+  useEffect(() => {
+    if (!customSearchContainerRef.current || !mapLoaded) return;
+    
+    const suggestionsContainer = customSearchContainerRef.current.querySelector(
+      "#map-search-suggestions-container"
+    );
+    if (!suggestionsContainer) return;
+
+    if (showSearchSuggestions && searchSuggestions.length > 0) {
+      suggestionsContainer.innerHTML = `
+        <div id="map-search-suggestions" style="
+          position: absolute;
+          top: 100%;
+          left: 0;
+          right: 0;
+          margin-top: 4px;
+          background: white;
+          border: 1px solid #ddd;
+          border-radius: 6px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          z-index: 1001;
+          max-height: 300px;
+          overflow-y: auto;
+        ">
+          ${searchSuggestions
+            .map(
+              (suggestion, idx) => `
+            <div 
+              class="map-suggestion-item ${
+                suggestion.isLocal ? "local-place" : ""
+              }"
+              data-index="${idx}"
+              style="
+                padding: 0.75rem;
+                cursor: pointer;
+                border-bottom: 1px solid #f0f0f0;
+                transition: background-color 0.2s;
+                ${
+                  suggestion.isLocal
+                    ? "background-color: #f0f7ff; border-left: 3px solid #667eea;"
+                    : ""
+                }
+              "
+              onmouseover="this.style.backgroundColor='${
+                suggestion.isLocal ? "#e0efff" : "#f5f5f5"
+              }'"
+              onmouseout="this.style.backgroundColor='${
+                suggestion.isLocal ? "#f0f7ff" : "white"
+              }'"
+            >
+              <div style="font-size: 0.9rem; font-weight: ${
+                suggestion.isLocal ? "600" : "500"
+              }; color: ${
+                suggestion.isLocal ? "#667eea" : "#333"
+              }; margin-bottom: 0.25rem;">
+                ${suggestion.isLocal ? "🏫 " : ""}${suggestion.name}
+              </div>
               ${
-                suggestion.isLocal
-                  ? "background-color: #f0f7ff; border-left: 3px solid #667eea;"
+                suggestion.context
+                  ? `<div style="font-size: 0.75rem; color: #666; font-style: italic;">${suggestion.context}</div>`
                   : ""
               }
-            "
-            onmouseover="this.style.backgroundColor='${
-              suggestion.isLocal ? "#e0efff" : "#f5f5f5"
-            }'"
-            onmouseout="this.style.backgroundColor='${
-              suggestion.isLocal ? "#f0f7ff" : "white"
-            }'"
-          >
-            <div style="font-size: 0.9rem; font-weight: ${
-              suggestion.isLocal ? "600" : "500"
-            }; color: ${
-              suggestion.isLocal ? "#667eea" : "#333"
-            }; margin-bottom: 0.25rem;">
-              ${suggestion.isLocal ? "🏫 " : ""}${suggestion.name}
+              ${
+                suggestion.description
+                  ? `<div style="font-size: 0.75rem; color: #888; margin-top: 0.25rem;">${suggestion.description.substring(
+                      0,
+                      60
+                    )}...</div>`
+                  : ""
+              }
             </div>
-            ${
-              suggestion.context
-                ? `<div style="font-size: 0.75rem; color: #666; font-style: italic;">${suggestion.context}</div>`
-                : ""
+          `
+            )
+            .join("")}
+        </div>
+      `;
+
+      const suggestionsDiv = suggestionsContainer.querySelector("#map-search-suggestions");
+      if (suggestionsDiv) {
+        const newDiv = suggestionsDiv.cloneNode(true);
+        suggestionsDiv.parentNode.replaceChild(newDiv, suggestionsDiv);
+        
+        newDiv.addEventListener("click", (e) => {
+          const item = e.target.closest(".map-suggestion-item");
+          if (item) {
+            const idx = parseInt(item.getAttribute("data-index"));
+            if (idx >= 0 && idx < searchSuggestions.length) {
+              handleSearchSelect(searchSuggestions[idx]);
             }
-            ${
-              suggestion.description
-                ? `<div style="font-size: 0.75rem; color: #888; margin-top: 0.25rem;">${suggestion.description.substring(
-                    0,
-                    60
-                  )}...</div>`
-                : ""
-            }
-          </div>
-        `
-          )
-          .join("")}
-      </div>
-    `
-        : "";
-
-    container.innerHTML = `
-      <div style="position: relative; width: 100%;">
-        <input
-          type="text"
-          id="map-search-input"
-          placeholder="🔍 Search for places on campus..."
-          style="width: 100%; padding: 10px 15px; font-size: 14px; border: 2px solid #ddd; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); outline: none; transition: border-color 0.2s;"
-          value="${searchQuery}"
-        />
-        ${suggestionsHTML}
-      </div>
-    `;
-
-    const input = container.querySelector("#map-search-input");
-    if (input) {
-      input.addEventListener("input", (e) => {
-        setSearchQuery(e.target.value);
-      });
-      input.addEventListener("focus", () => {
-        if (searchSuggestions.length > 0) {
-          setShowSearchSuggestions(true);
-        }
-      });
-      input.addEventListener("blur", () => {
-        setTimeout(() => setShowSearchSuggestions(false), 200);
-      });
-      input.addEventListener("focus", () => {
-        input.style.borderColor = "#667eea";
-      });
-      input.addEventListener("blur", () => {
-        input.style.borderColor = "#ddd";
-      });
-    }
-
-    // Add click handlers for suggestions using event delegation
-    const suggestionsContainer = container.querySelector(
-      "#map-search-suggestions"
-    );
-    if (suggestionsContainer) {
-      suggestionsContainer.addEventListener("click", (e) => {
-        const item = e.target.closest(".map-suggestion-item");
-        if (item) {
-          const idx = parseInt(item.getAttribute("data-index"));
-          if (idx >= 0 && idx < searchSuggestions.length) {
-            handleSearchSelect(searchSuggestions[idx]);
           }
-        }
-      });
+        });
+      }
+    } else {
+      suggestionsContainer.innerHTML = "";
     }
   }, [
     mapLoaded,
-    searchQuery,
     searchSuggestions,
     showSearchSuggestions,
     handleSearchSelect,
   ]);
 
-  // Handle map click for drawing mode or navigation location setting
   useEffect(() => {
     if (!map.current || !mapLoaded) return;
 
     const handleMapClick = (e) => {
-      // Prevent click on geocoder control, popups, or other UI elements
       if (e.originalEvent) {
         const target = e.originalEvent.target;
         if (
@@ -399,9 +409,7 @@ const MapComponent = ({
 
       const { lng, lat } = e.lngLat;
 
-      // Check for place collection mode (for extracting places from map)
       if (window.isCollectingPlaces) {
-        // Show prompt to enter place name, with coordinates as default
         const defaultName = `Place at ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
         const placeName = prompt(
           `Enter name for this place:\n\nCoordinates: ${lat.toFixed(
@@ -418,38 +426,26 @@ const MapComponent = ({
               longitude: lng,
             });
           }
-        } else {
-          console.log("Place collection cancelled or empty name");
         }
         return;
       }
 
-      // Check for navigation mode first
       if (window.setNavLocationType && window.setNavLocation) {
-        console.log("Map clicked for navigation:", {
-          type: window.setNavLocationType,
-          lng,
-          lat,
-        });
         window.setNavLocation(lng, lat);
-        // Don't clear here - let the NavigationPanel handle it
         if (map.current) {
           map.current.getCanvas().style.cursor = "";
         }
         return;
       }
 
-      // Check for drawing mode
       if (isDrawingMode && onMapClick) {
         onMapClick(lng, lat);
       }
     };
 
-    // Always attach the handler, but only enable cursor in specific modes
     map.current.on("click", handleMapClick);
     mapClickHandlerRef.current = handleMapClick;
 
-    // Update cursor based on current mode
     const updateCursor = () => {
       if (!map.current) return;
       const isNavMode =
@@ -474,7 +470,6 @@ const MapComponent = ({
     };
   }, [isDrawingMode, onMapClick, mapLoaded]);
 
-  // Clear existing markers and routes
   const clearMap = () => {
     markersRef.current.forEach((marker) => marker.remove());
     markersRef.current = [];
@@ -486,11 +481,9 @@ const MapComponent = ({
     routeLinesRef.current = [];
   };
 
-  // Display places on map
   useEffect(() => {
     if (!map.current || !mapLoaded) return;
 
-    // Clear previous place markers
     placeMarkersRef.current.forEach((marker) => marker.remove());
     placeMarkersRef.current = [];
 
@@ -528,48 +521,25 @@ const MapComponent = ({
         )
         .addTo(map.current);
 
-      // Click handler for place marker - check navigation mode first
       const handlePlaceMarkerClick = (e) => {
-        // Prevent event from bubbling to map click
         if (e.stopPropagation) {
           e.stopPropagation();
         }
 
-        console.log("Place marker clicked:", {
-          placeName: place.name,
-          navType: window.setNavLocationType,
-          hasNavHandler: !!window.setNavLocation,
-        });
-
-        // Check if navigation mode is active - prioritize setting navigation location
         if (window.setNavLocationType && window.setNavLocation) {
-          console.log("Setting navigation location from place marker:", {
-            type: window.setNavLocationType,
-            name: place.name,
-            lng: place.longitude,
-            lat: place.latitude,
-          });
-
-          // Call the navigation location setter
           window.setNavLocation(place.longitude, place.latitude, place.name);
-
-          // The NavigationPanel will clear window.setNavLocationType, but we clear cursor here
           if (map.current) {
             map.current.getCanvas().style.cursor = "";
           }
           return;
         }
 
-        // Otherwise, open place details
         if (onPlaceSelect) {
           onPlaceSelect(place);
         }
       };
 
-      // Add click handler to the inner element
       el.addEventListener("click", handlePlaceMarkerClick);
-
-      // Also add click handler to the marker element (Mapbox wraps it)
       const markerElement = marker.getElement();
       if (markerElement) {
         markerElement.addEventListener("click", handlePlaceMarkerClick);
@@ -580,19 +550,15 @@ const MapComponent = ({
     });
   }, [places, mapLoaded, onPlaceSelect]);
 
-  // Display routes on map
   useEffect(() => {
     if (!map.current || !mapLoaded) return;
 
     clearMap();
-
-    // Ensure routes is an array
     const safeRoutes = Array.isArray(routes) ? routes : [];
 
     safeRoutes.forEach((route, routeIndex) => {
       if (!route.waypoints || route.waypoints.length === 0) return;
 
-      // Create markers for waypoints
       route.waypoints.forEach((waypoint, index) => {
         const el = document.createElement("div");
         el.className = `custom-marker ${
@@ -614,7 +580,6 @@ const MapComponent = ({
         markersRef.current.push(marker);
       });
 
-      // Draw route line if there are at least 2 waypoints
       if (
         route.waypoints.length >= 2 &&
         (!selectedRoute ||
@@ -671,7 +636,6 @@ const MapComponent = ({
       }
     });
 
-    // Fit map to show all routes if no route is selected
     if (safeRoutes.length > 0 && !selectedRoute) {
       const allCoordinates = safeRoutes
         .flatMap((route) => route.waypoints || [])
@@ -692,7 +656,6 @@ const MapComponent = ({
       selectedRoute.waypoints &&
       selectedRoute.waypoints.length > 0
     ) {
-      // Fit map to selected route
       const coordinates = selectedRoute.waypoints
         .sort((a, b) => a.order - b.order)
         .map((wp) => [wp.longitude, wp.latitude]);
@@ -708,7 +671,6 @@ const MapComponent = ({
     }
   }, [routes, selectedRoute, mapLoaded]);
 
-  // Handle navigation route calculation
   useEffect(() => {
     if (!map.current || !mapLoaded || !navigationRoute) return;
 
@@ -717,9 +679,13 @@ const MapComponent = ({
       const { start, end, profile } = navigationRoute;
 
       try {
-        // Clear previous navigation markers and route
         navMarkersRef.current.forEach((marker) => marker.remove());
         navMarkersRef.current = [];
+        
+        if (searchResultMarkerRef.current) {
+          searchResultMarkerRef.current.remove();
+          searchResultMarkerRef.current = null;
+        }
 
         if (navRouteLayerRef.current) {
           if (map.current.getLayer(navRouteLayerRef.current)) {
@@ -731,7 +697,6 @@ const MapComponent = ({
           navRouteLayerRef.current = null;
         }
 
-        // Add start and end markers
         const startMarker = new mapboxgl.Marker({ color: "#4CAF50" })
           .setLngLat([start.lng, start.lat])
           .setPopup(
@@ -752,7 +717,6 @@ const MapComponent = ({
 
         navMarkersRef.current.push(startMarker, endMarker);
 
-        // Call Directions API
         const coordinates = `${start.lng},${start.lat};${end.lng},${end.lat}`;
         const url = `https://api.mapbox.com/directions/v5/mapbox/${profile}/${coordinates}?access_token=${token}&geometries=geojson&steps=true&overview=full`;
 
@@ -763,7 +727,6 @@ const MapComponent = ({
           const route = data.routes[0];
           const geometry = route.geometry;
 
-          // Display route on map
           const sourceId = "nav-route";
           navRouteLayerRef.current = sourceId;
 
@@ -799,9 +762,8 @@ const MapComponent = ({
             });
           }
 
-          // Calculate travel time and distance
-          const duration = route.duration; // in seconds
-          const distance = route.distance; // in meters
+          const duration = route.duration;
+          const distance = route.distance;
 
           const hours = Math.floor(duration / 3600);
           const minutes = Math.floor((duration % 3600) / 60);
@@ -817,7 +779,6 @@ const MapComponent = ({
             duration: duration,
           });
 
-          // Fit map to show entire route
           const routeCoords = geometry.coordinates;
           const bounds = routeCoords.reduce((bounds, coord) => {
             return bounds.extend(coord);
@@ -872,15 +833,7 @@ const MapComponent = ({
         className="map-container-inner"
         style={{ minHeight: "400px" }}
       />
-      <div className="map-controls">
-        <div className="map-info">
-          {routes.length > 0 && (
-            <p>
-              {routes.length} route{routes.length !== 1 ? "s" : ""} available
-            </p>
-          )}
-        </div>
-      </div>
+      
       {navInfo && (
         <div className="nav-info-panel">
           <div className="nav-info-header">📍 Navigation</div>

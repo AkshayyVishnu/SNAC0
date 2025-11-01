@@ -115,3 +115,6 @@ Once places are in the database:
 - Coordinates should be accurate (use exact lat/lng from map)
 - Category must be one of: eateries, recreation, educational, administration, staff_quarters, hostel, library, other
 
+
+
+

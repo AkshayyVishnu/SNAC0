@@ -4,13 +4,55 @@
   border-radius: 8px;
   margin-bottom: 1rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
 }
 
-.navigation-panel h3 {
+.navigation-panel h3, .navigation-panel h4 {
   margin: 0 0 1rem 0;
-  color: #333;
+    color: #333;
   font-size: 1.1rem;
 }
+
+.place-management {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.place-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.btn-add-place, .btn-populate-places {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.btn-add-place {
+  background: #22c55e;
+  color: white;
+}
+
+.btn-add-place:hover {
+  background: #16a34a;
+}
+
+.btn-populate-places {
+  background: #ef4444;
+  color: white;
+}
+
+.btn-populate-places:hover {
+  background: #dc2626;
+}
+
 
 .nav-form {
   display: flex;
@@ -33,7 +75,8 @@
 .nav-input-row {
   display: flex;
   gap: 0.5rem;
-  align-items: center;
+  align-items: stretch;
+  position: relative;
 }
 
 .nav-input-row input {
@@ -42,6 +85,7 @@
   border: 1px solid #ddd;
   border-radius: 6px;
   font-size: 0.9rem;
+  min-width: 0;
 }
 
 .nav-input-row input:focus {
@@ -51,14 +95,19 @@
 }
 
 .btn-set-location {
-  padding: 0.75rem 1rem;
+  padding: 0.75rem;
   background: #f0f0f0;
   border: 1px solid #ddd;
   border-radius: 6px;
   cursor: pointer;
   font-size: 1.2rem;
   transition: all 0.2s;
-  min-width: 50px;
+  min-width: 48px;
+  height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .btn-set-location:hover {
@@ -137,14 +186,14 @@
   position: absolute;
   top: 100%;
   left: 0;
-  right: 50px;
+  right: 52px; /* Account for button width (48px) + gap (0.5rem = 8px) + some padding */
   margin-top: 4px;
   background: white;
   border: 1px solid #ddd;
   border-radius: 6px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   z-index: 1000;
-  max-height: 200px;
+  max-height: 300px;
   overflow-y: auto;
 }
 
@@ -194,5 +243,183 @@
 .suggestion-item.local-place .suggestion-name {
   font-weight: 600;
   color: #667eea;
+}
+
+@media (max-width: 768px) {
+  .navigation-panel {
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .navigation-panel h3 {
+    font-size: 0.95rem;
+    margin-bottom: 0.75rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .nav-form {
+    gap: 0.6rem;
+  }
+
+  .nav-input-group {
+    gap: 0.35rem;
+  }
+
+  .nav-input-group label {
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .nav-input-row {
+    gap: 0.35rem;
+  }
+
+  .nav-input-row input {
+    padding: 0.5rem 0.6rem;
+    font-size: 0.85rem;
+    border-radius: 4px;
+  }
+
+  .btn-set-location {
+    padding: 0.5rem;
+    min-width: 40px;
+    font-size: 1rem;
+    border-radius: 4px;
+  }
+
+  .nav-input-group select {
+    padding: 0.5rem 0.6rem;
+    font-size: 0.85rem;
+    border-radius: 4px;
+  }
+
+  .nav-actions {
+    gap: 0.4rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-calculate {
+    flex: 1;
+    min-width: 120px;
+    padding: 0.55rem;
+    font-size: 0.85rem;
+    border-radius: 4px;
+  }
+
+  .btn-clear {
+    padding: 0.55rem 0.75rem;
+    font-size: 0.85rem;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  .suggestions-dropdown {
+    right: 44px;
+    max-height: 200px;
+    font-size: 0.8rem;
+    margin-top: 2px;
+  }
+
+  .suggestion-item {
+    padding: 0.5rem;
+  }
+
+  .suggestion-name {
+    font-size: 0.8rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .suggestion-context,
+  .suggestion-desc {
+    font-size: 0.7rem;
+  }
+
+  .location-coords {
+    font-size: 0.65rem;
+    padding-left: 0.35rem;
+    margin-top: 0.2rem;
+  }
+
+  .nav-form > .nav-input-group:nth-child(3),
+  .nav-form > .nav-actions {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .nav-form > .nav-input-group:nth-child(3) {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .nav-form > .nav-input-group:nth-child(3) label {
+    margin-bottom: 0;
+    margin-right: 0.5rem;
+    white-space: nowrap;
+  }
+
+  .nav-form > .nav-input-group:nth-child(3) select {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .navigation-panel {
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .navigation-panel h3 {
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .nav-form {
+    gap: 0.4rem;
+  }
+
+  .nav-input-group {
+    gap: 0.3rem;
+  }
+
+  .nav-input-group label {
+    font-size: 0.75rem;
+  }
+
+  .nav-input-row input {
+    padding: 0.4rem 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  .btn-set-location {
+    padding: 0.4rem;
+    min-width: 36px;
+    font-size: 0.9rem;
+  }
+
+  .nav-input-group select {
+    padding: 0.4rem 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  .btn-calculate,
+  .btn-clear {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8rem;
+  }
+
+  .suggestions-dropdown {
+    right: 40px;
+    max-height: 150px;
+  }
+
+  .location-coords {
+    font-size: 0.6rem;
+  }
 }
 

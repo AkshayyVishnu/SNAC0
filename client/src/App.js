@@ -9,7 +9,17 @@ import './App.css';
 function App() {
   const [routes, setRoutes] = useState([]);
   const [selectedRoute, setSelectedRoute] = useState(null);
-  const [isPanelOpen, setIsPanelOpen] = useState(true);
+  const [isPanelOpen, setIsPanelOpen] = useState(window.innerWidth > 768);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+    };
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
   const [isDrawingRoute, setIsDrawingRoute] = useState(false);
   const [onMapClickCallback, setOnMapClickCallback] = useState(null);
   const [navigationRoute, setNavigationRoute] = useState(null);
@@ -25,11 +35,9 @@ function App() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      // Ensure routes is always an array
       setRoutes(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching routes:', error);
-      // Set to empty array on error to prevent crashes
       setRoutes([]);
     }
   };
@@ -74,15 +82,30 @@ function App() {
   return (
     <div className="App">
       <header className="app-header">
-        <h1>Campus Navigation System</h1>
-        <button 
-          className="toggle-panel-btn"
-          onClick={() => setIsPanelOpen(!isPanelOpen)}
-        >
-          {isPanelOpen ? 'Hide' : 'Show'} Routes
-        </button>
+        <h1>SNACO</h1>
+        <div className="header-actions">
+          <button 
+            className="mobile-menu-btn"
+            onClick={() => setIsPanelOpen(!isPanelOpen)}
+            aria-label="Toggle menu"
+          >
+            <span className="menu-icon">⋯</span>
+          </button>
+          <button 
+            className="toggle-panel-btn"
+            onClick={() => setIsPanelOpen(!isPanelOpen)}
+          >
+            {isPanelOpen ? 'Hide' : 'Show'} Routes
+          </button>
+        </div>
       </header>
       <div className="app-container">
+        {isPanelOpen && isMobile && (
+          <div 
+            className="sidebar-overlay"
+            onClick={() => setIsPanelOpen(false)}
+          />
+        )}
         <div className={`sidebar-panel ${isPanelOpen ? '' : 'hidden'}`}>
           <NavigationPanel
             onRouteCalculate={handleNavigationCalculate}
