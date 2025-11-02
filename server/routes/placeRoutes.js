@@ -37,12 +37,16 @@ router.get('/', async (req, res) => {
 // Get places by category
 router.get('/category/:category', async (req, res) => {
   try {
+    const category = req.params.category.toLowerCase().trim();
+    //console.log('Fetching places for category:', category);
     const places = await Place.find({ 
-      category: req.params.category,
+      category: category,
       isActive: true 
     }).sort({ name: 1 });
+    //console.log(`Found ${places.length} places for category: ${category}`);
     res.json(places);
   } catch (error) {
+    //console.error('Error fetching places by category:', error);
     res.status(500).json({ error: error.message });
   }
 });

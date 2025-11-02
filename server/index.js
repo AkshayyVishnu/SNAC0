@@ -4,6 +4,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const routeRoutes = require('./routes/routeRoutes');
 const placeRoutes = require('./routes/placeRoutes');
+const authRoutes = require('./routes/authRoutes');
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/campus_na
 // Routes
 app.use('/api/routes', routeRoutes);
 app.use('/api/places', placeRoutes);
+app.use('/api/auth', authRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
