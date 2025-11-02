@@ -20,15 +20,15 @@
 
 .mapboxgl-ctrl-geocoder {
   width: 100%;
-  max-width: 400px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  border-radius: 6px;
+  max-width: 420px;
+  box-shadow: 0 8px 24px rgba(16,24,40,0.08);
+  border-radius: calc(var(--radius) - 2px);
 }
 
 .mapboxgl-ctrl-geocoder input {
   padding: 10px 40px 10px 15px;
   font-size: 14px;
-  border-radius: 6px;
+  border-radius: calc(var(--radius) - 2px);
 }
 
 .mapboxgl-ctrl-geocoder--icon {
@@ -36,86 +36,49 @@
 }
 
 .map-info {
-  background: white;
+  background: var(--card);
   padding: 0.75rem 1rem;
-  border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  font-size: 0.875rem;
-  color: #333;
+  border-radius: calc(var(--radius) - 2px);
+  box-shadow: 0 6px 18px rgba(16,24,40,0.06);
+  font-size: 0.9rem;
+  color: var(--text);
 }
 
 .custom-marker {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
-  border: 3px solid white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  border: 3px solid #fff;
+  box-shadow: 0 6px 18px rgba(16,24,40,0.08);
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: transform 0.14s ease;
 }
 
-.custom-marker:hover {
-  transform: scale(1.2);
-}
-
-.custom-marker.selected {
-  width: 24px;
-  height: 24px;
-  border-width: 4px;
-  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.4);
-}
+.custom-marker:hover { transform: translateY(-2px) scale(1.05); }
+.custom-marker.selected { transform: scale(1.08); box-shadow: 0 10px 28px rgba(16,24,40,0.12); }
 
 .nav-info-panel {
   position: absolute;
-  bottom: 20px;
-  right: 20px;
-  background: white;
-  padding: 1rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  bottom: 18px;
+  right: 18px;
+  background: var(--card);
+  padding: 0.875rem;
+  border-radius: var(--radius);
+  box-shadow: 0 10px 32px rgba(16,24,40,0.08);
   z-index: 1000;
-  min-width: 200px;
-  max-width: 300px;
+  min-width: 220px;
+  max-width: 320px;
 }
-
 .nav-info-header {
   font-weight: 600;
-  font-size: 1rem;
-  margin-bottom: 0.75rem;
-  color: #333;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 0.5rem;
+  font-size: 0.95rem;
+  margin-bottom: 0.6rem;
+  color: var(--text);
+  border-bottom: 1px solid rgba(15,23,42,0.04);
+  padding-bottom: 0.4rem;
 }
-
-.nav-info-item {
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
-  color: #555;
-}
-
-.nav-info-item strong {
-  color: #333;
-  margin-right: 0.5rem;
-}
-
-.nav-info-close {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: transparent;
-  border: none;
-  font-size: 1.2rem;
-  cursor: pointer;
-  color: #999;
-  padding: 0;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.nav-info-close:hover {
-  color: #333;
-}
+.nav-info-item { margin-bottom: 0.45rem; font-size: 0.9rem; color: var(--muted); }
+.nav-info-item strong { color: var(--text); margin-right: 0.4rem; }
+.nav-info-close { position: absolute; top: 8px; right: 8px; background: transparent; border: none; font-size: 1.1rem; cursor: pointer; color: var(--muted); padding: 0; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; }
+.nav-info-close:hover { color: var(--text); }
 

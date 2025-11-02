@@ -1,4 +1,4 @@
-* {
+  * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -11,6 +11,30 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+:root {
+  /* Colors */
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --muted: #6b7280;
+  --text: #111827;
+  --accent: #6366f1; /* soft indigo */
+  --accent-2: #7c3aed; /* secondary */
+  --success: #16a34a;
+  --danger: #ef4444;
+
+  /* Spacing & layout */
+  --gap-sm: 0.5rem;
+  --gap: 1rem;
+  --gap-lg: 1.5rem;
+  --radius: 8px;
+  --control-height: 40px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
 }
 
 code {

@@ -10,28 +10,18 @@
   gap: 0.5rem;
 }
 
-.form-group label {
-  font-weight: 500;
-  color: #374151;
-  font-size: 0.875rem;
-}
+.form-group label { font-weight: 500; color: var(--muted); font-size: 0.9rem; }
 
-.form-group input[type="text"],
-.form-group input[type="number"],
-.form-group textarea {
+.form-group input[type="text"], .form-group input[type="number"], .form-group textarea {
   padding: 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  transition: border-color 0.2s;
+  border: 1px solid rgba(15,23,42,0.06);
+  border-radius: calc(var(--radius) - 2px);
+  font-size: 0.95rem;
 }
-
-.form-group input[type="text"]:focus,
-.form-group input[type="number"]:focus,
-.form-group textarea:focus {
+.form-group input[type="text"]:focus, .form-group input[type="number"]:focus, .form-group textarea:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: var(--accent);
+  box-shadow: 0 8px 24px rgba(99,102,241,0.06);
 }
 
 .form-group input.error,
@@ -39,11 +29,7 @@
   border-color: #ef4444;
 }
 
-.error-message {
-  color: #ef4444;
-  font-size: 0.75rem;
-  margin-top: -0.25rem;
-}
+.error-message { color: var(--danger); font-size: 0.85rem; margin-top: -0.25rem; }
 
 .color-input-group {
   display: flex;
@@ -69,21 +55,8 @@
   align-items: center;
 }
 
-.btn-add-waypoint {
-  background: #667eea;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 500;
-  transition: background 0.2s;
-}
-
-.btn-add-waypoint:hover {
-  background: #5568d3;
-}
+.btn-add-waypoint { background: var(--accent); color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-weight: 600; }
+.btn-add-waypoint:hover { transform: translateY(-1px); }
 
 .waypoints-list {
   display: flex;
@@ -94,12 +67,7 @@
   padding: 0.5rem 0;
 }
 
-.waypoint-item {
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 1rem;
-  background: #f9fafb;
-}
+.waypoint-item { border: 1px solid rgba(15,23,42,0.04); border-radius: var(--radius); padding: 1rem; background: var(--bg); }
 
 .waypoint-header {
   display: flex;
@@ -119,20 +87,7 @@
   gap: 0.25rem;
 }
 
-.btn-move,
-.btn-remove {
-  width: 24px;
-  height: 24px;
-  border: 1px solid #d1d5db;
-  background: white;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.75rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-}
+.btn-move, .btn-remove { width: 28px; height: 28px; border: 1px solid rgba(15,23,42,0.06); background: var(--card); border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
 .btn-move:hover:not(:disabled) {
   background: #f3f4f6;
@@ -144,15 +99,8 @@
   cursor: not-allowed;
 }
 
-.btn-remove {
-  color: #ef4444;
-  border-color: #ef4444;
-}
-
-.btn-remove:hover {
-  background: #ef4444;
-  color: white;
-}
+.btn-remove { color: var(--danger); border-color: transparent; }
+.btn-remove:hover { background: var(--danger); color: white; }
 
 .waypoint-fields {
   display: grid;
@@ -198,26 +146,12 @@
   color: #374151;
 }
 
-.btn-cancel:hover {
-  background: #f9fafb;
-  border-color: #9ca3af;
-}
+.form-actions { display: flex; gap: 0.75rem; padding-top: 1rem; border-top: 1px solid rgba(15,23,42,0.04); }
+.btn-cancel, .btn-submit { flex: 1; padding: 0.75rem; border-radius: calc(var(--radius) - 2px); font-weight: 600; cursor: pointer; }
+.btn-cancel { background: var(--card); border: 1px solid rgba(15,23,42,0.06); color: var(--muted); }
+.btn-cancel:hover { transform: translateY(-1px); }
+.btn-submit { background: var(--accent); color: white; border: none; }
+.btn-submit:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(99,102,241,0.08); }
 
-.btn-submit {
-  background: #667eea;
-  border: none;
-  color: white;
-}
 
-.btn-submit:hover {
-  background: #5568d3;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
-}
-
-@media (max-width: 768px) {
-  .waypoint-fields {
-    grid-template-columns: 1fr;
-  }
-}
 

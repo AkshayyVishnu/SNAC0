@@ -12,6 +12,20 @@
     color: #333;
   font-size: 1.1rem;
 }
+.navigation-panel {
+  background: var(--card);
+  padding: var(--gap);
+  border-radius: var(--radius);
+  margin-bottom: var(--gap);
+  box-shadow: 0 6px 18px rgba(16,24,40,0.06);
+  flex-shrink: 0;
+}
+.navigation-panel h3, .navigation-panel h4 {
+  margin: 0 0 0.75rem 0;
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 600;
+}
 
 .place-management {
   margin-top: 1.5rem;
@@ -23,6 +37,36 @@
   display: flex;
   gap: 1rem;
   margin-top: 0.5rem;
+}
+.place-actions {
+  display: flex;
+  gap: var(--gap-sm);
+  margin-top: var(--gap-sm);
+}
+
+.btn-add-place, .btn-clean-places {
+  flex: 1;
+  height: var(--control-height);
+  border: none;
+  border-radius: calc(var(--radius) - 2px);
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.btn-add-place {
+  background: linear-gradient(90deg, var(--success), #059669);
+  color: white;
+}
+
+.btn-add-place.active {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
+.btn-clean-places {
+  background: linear-gradient(90deg, var(--danger), #dc2626);
+  color: white;
 }
 
 .btn-add-place, .btn-populate-places {

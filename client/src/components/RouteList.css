@@ -5,18 +5,18 @@
 }
 
 .route-item {
-  border: 2px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 1rem;
+  border: 1px solid rgba(15,23,42,0.06);
+  border-radius: var(--radius);
+  padding: var(--gap);
   cursor: pointer;
-  transition: all 0.2s;
-  background: white;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  background: var(--card);
 }
 
 .route-item:hover {
-  border-color: #667eea;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
-  transform: translateY(-2px);
+  border-color: var(--accent);
+  box-shadow: 0 10px 24px rgba(99,102,241,0.08);
+  transform: translateY(-3px);
 }
 
 .route-item.selected {
@@ -44,13 +44,13 @@
 .route-name {
   font-size: 1rem;
   font-weight: 600;
-  color: #111827;
+  color: var(--text);
   margin: 0;
 }
 
 .route-description {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--muted);
   margin: 0.5rem 0;
   line-height: 1.4;
 }
@@ -58,7 +58,7 @@
 .route-meta {
   margin: 0.5rem 0;
   font-size: 0.75rem;
-  color: #9ca3af;
+  color: rgba(15,23,42,0.45);
 }
 
 .route-actions {
@@ -73,12 +73,12 @@
 .btn-delete {
   flex: 1;
   padding: 0.5rem;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  background: white;
+  border: 1px solid rgba(15,23,42,0.06);
+  border-radius: calc(var(--radius) - 2px);
+  background: var(--card);
   cursor: pointer;
-  font-size: 0.875rem;
-  transition: all 0.2s;
+  font-size: 0.9rem;
+  transition: transform 0.12s ease;
 }
 
 .btn-edit {
@@ -87,7 +87,7 @@
 }
 
 .btn-edit:hover {
-  background: #667eea;
+  background: var(--accent);
   color: white;
 }
 
@@ -97,14 +97,14 @@
 }
 
 .btn-delete:hover {
-  background: #ef4444;
+  background: var(--danger);
   color: white;
 }
 
 .empty-state {
   text-align: center;
   padding: 3rem 1rem;
-  color: #6b7280;
+  color: var(--muted);
 }
 
 .empty-state p {

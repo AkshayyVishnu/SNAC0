@@ -1,52 +1,33 @@
 .route-panel {
   width: 100%;
-  background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-  z-index: 100;
-  overflow: hidden;
-  flex-shrink: 0;
-  min-height: fit-content;
-}
+  .route-panel {
+    width: 100%;
+    background: var(--card);
+    box-shadow: 0 10px 32px rgba(16,24,40,0.06);
+    border-radius: var(--radius);
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
 
-.route-panel-header {
-  padding: 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-}
+  .route-panel-header {
+    padding: calc(var(--gap) * 1.25);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--gap);
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    color: white;
+    border-bottom-left-radius: calc(var(--radius) - 2px);
+    border-bottom-right-radius: calc(var(--radius) - 2px);
+  }
 
-.route-panel-header h2 {
-  font-size: 1.25rem;
-  font-weight: 600;
-}
-
-.btn-primary {
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 500;
-  transition: all 0.2s;
-}
-
-.btn-primary:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: translateY(-1px);
-}
-
-.route-panel-content {
-  flex: 1;
-  overflow-y: auto;
-  padding: 1rem;
+  .route-panel-header h2 { font-size: 1.1rem; font-weight: 700; margin: 0; }
+  .btn-primary { background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.26); color: white; padding: 0.55rem 0.85rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
+  .btn-primary:hover { transform: translateY(-1px); }
+  .route-panel-content { flex: 1; overflow-y: auto; padding: var(--gap); }
 }
 
 @media (max-width: 768px) {
