@@ -12,7 +12,8 @@ const RoutePanel = ({
   onRouteDeleted,
   onRouteUpdated,
   onDrawingModeChange,
-  onMapClickCallbackChange
+  onMapClickCallbackChange,
+  isAdmin = false
 }) => {
   const [isCreating, setIsCreating] = useState(false);
   const [editingRoute, setEditingRoute] = useState(null);
@@ -56,9 +57,11 @@ const RoutePanel = ({
     <div className="route-panel">
       <div className="route-panel-header">
         <h2>Routes</h2>
-        <button className="btn-primary" onClick={handleCreate}>
-          + New Route
-        </button>
+        {isAdmin && (
+          <button className="btn-primary" onClick={handleCreate}>
+            + New Route
+          </button>
+        )}
       </div>
 
       <div className="route-panel-content">
@@ -84,6 +87,7 @@ const RoutePanel = ({
             onSelectRoute={onSelectRoute}
             onEdit={handleEdit}
             onDelete={onRouteDeleted}
+            isAdmin={isAdmin}
           />
         )}
       </div>

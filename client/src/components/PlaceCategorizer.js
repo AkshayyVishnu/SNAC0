@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import PlaceForm from './PlaceForm';
 import './PlaceCategorizer.css';
 
-const PlaceCategorizer = ({ onPlaceSelect }) => {
+const PlaceCategorizer = ({ onPlaceSelect, isAdmin = false }) => {
   const [places, setPlaces] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const [loading, setLoading] = useState(false);
   const [editingPlace, setEditingPlace] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -34,11 +34,18 @@ const PlaceCategorizer = ({ onPlaceSelect }) => {
         ? `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/places/category/${selectedCategory}`
         : `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/places`;
       
+      //console.log('Fetching places from:', url);
       const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
+      //console.log('Places fetched:', data.length, 'items for category:', selectedCategory);
       setPlaces(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error('Error fetching places:', error);
+      //console.error('Error fetching places:', error);
       setPlaces([]);
     } finally {
       setLoading(false);
@@ -164,61 +171,65 @@ const PlaceCategorizer = ({ onPlaceSelect }) => {
       <div className="categorizer-header">
         <h3>🗺️ Places</h3>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          {!isCollectingPlaces ? (
-            <button 
-              onClick={handleStartCollectingPlaces}
-              style={{
-                padding: '0.5rem 1rem',
-                background: '#FF9800',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontSize: '0.875rem',
-                fontWeight: '500'
-              }}
-              title="Click on places on the map to collect them"
-            >
-              📍 Collect from Map
-            </button>
-          ) : (
+          {isAdmin && (
             <>
-              <button 
-                onClick={handleSaveCollectedPlaces}
-                disabled={isSaving || collectedPlaces.length === 0}
-                style={{
-                  padding: '0.5rem 1rem',
-                  background: isSaving || collectedPlaces.length === 0 ? '#ccc' : '#4CAF50',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: isSaving || collectedPlaces.length === 0 ? 'not-allowed' : 'pointer',
-                  fontSize: '0.875rem',
-                  fontWeight: '500'
-                }}
-                title={`Save ${collectedPlaces.length} collected places`}
-              >
-                {isSaving ? '⏳ Saving...' : `💾 Save Collected (${collectedPlaces.length})`}
-              </button>
-              <button 
-                onClick={handleStopCollectingPlaces}
-                style={{
-                  padding: '0.5rem 1rem',
-                  background: '#f44336',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontSize: '0.875rem',
-                  fontWeight: '500'
-                }}
-              >
-                ✕ Stop Collecting
-              </button>
+              {!isCollectingPlaces ? (
+                <button 
+                  onClick={handleStartCollectingPlaces}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    background: '#FF9800',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '0.875rem',
+                    fontWeight: '500'
+                  }}
+                  title="Click on places on the map to collect them"
+                >
+                  📍 Collect from Map
+                </button>
+              ) : (
+                <>
+                  <button 
+                    onClick={handleSaveCollectedPlaces}
+                    disabled={isSaving || collectedPlaces.length === 0}
+                    style={{
+                      padding: '0.5rem 1rem',
+                      background: isSaving || collectedPlaces.length === 0 ? '#ccc' : '#4CAF50',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '6px',
+                      cursor: isSaving || collectedPlaces.length === 0 ? 'not-allowed' : 'pointer',
+                      fontSize: '0.875rem',
+                      fontWeight: '500'
+                    }}
+                    title={`Save ${collectedPlaces.length} collected places`}
+                  >
+                    {isSaving ? '⏳ Saving...' : `💾 Save Collected (${collectedPlaces.length})`}
+                  </button>
+                  <button 
+                    onClick={handleStopCollectingPlaces}
+                    style={{
+                      padding: '0.5rem 1rem',
+                      background: '#f44336',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      fontSize: '0.875rem',
+                      fontWeight: '500'
+                    }}
+                  >
+                    ✕ Stop Collecting
+                  </button>
+                </>
+              )}
             </>
           )}
         </div>
-        {isCollectingPlaces && (
+        {isAdmin && isCollectingPlaces && (
           <div style={{
             padding: '0.75rem',
             margin: '0.5rem 0',
@@ -263,8 +274,8 @@ const PlaceCategorizer = ({ onPlaceSelect }) => {
 
       <div className="places-list">
         {selectedCategory && selectedCategory !== 'all' ? (
-          groupedPlaces[selectedCategory]?.length > 0 ? (
-            groupedPlaces[selectedCategory].map((place) => (
+          places.length > 0 ? (
+            places.map((place) => (
                 <div key={place._id} className="place-item">
                   <div
                     className="place-item-content"

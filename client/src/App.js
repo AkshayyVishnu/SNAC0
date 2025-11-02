@@ -1,152 +1,76 @@
 import React, { useState, useEffect } from 'react';
-import MapComponent from './components/MapComponent';
-import RoutePanel from './components/RoutePanel';
-import NavigationPanel from './components/NavigationPanel';
-import PlaceCategorizer from './components/PlaceCategorizer';
-import PlaceDetails from './components/PlaceDetails';
+import Login from './components/Login';
+import Signup from './components/Signup';
+import AdminPage from './components/AdminPage';
+import UserPage from './components/UserPage';
 import './App.css';
 
 function App() {
-  const [routes, setRoutes] = useState([]);
-  const [selectedRoute, setSelectedRoute] = useState(null);
-  const [isPanelOpen, setIsPanelOpen] = useState(window.innerWidth > 768);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-  
-  useEffect(() => {
-    const checkMobile = () => {
-      const mobile = window.innerWidth <= 768;
-      setIsMobile(mobile);
-    };
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-  const [isDrawingRoute, setIsDrawingRoute] = useState(false);
-  const [onMapClickCallback, setOnMapClickCallback] = useState(null);
-  const [navigationRoute, setNavigationRoute] = useState(null);
-  const [isSettingNavLocation, setIsSettingNavLocation] = useState(null);
-  const [selectedPlace, setSelectedPlace] = useState(null);
-  const [places, setPlaces] = useState([]);
+  const [currentPage, setCurrentPage] = useState('login'); // 'login', 'signup', 'user', 'admin'
+  const [user, setUser] = useState(null);
 
-  // Fetch routes from API
-  const fetchRoutes = async () => {
-    try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/routes`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+  useEffect(() => {
+    // Check if user is already logged in
+    const isAuthenticated = localStorage.getItem('isAuthenticated');
+    const storedUser = localStorage.getItem('user');
+    
+    if (isAuthenticated === 'true' && storedUser) {
+      try {
+        const userData = JSON.parse(storedUser);
+        setUser(userData);
+        setCurrentPage(userData.role === 'admin' ? 'admin' : 'user');
+      } catch (error) {
+        console.error('Error parsing stored user:', error);
+        localStorage.removeItem('user');
+        localStorage.removeItem('isAuthenticated');
       }
-      const data = await response.json();
-      setRoutes(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error('Error fetching routes:', error);
-      setRoutes([]);
     }
-  };
-
-  useEffect(() => {
-    fetchRoutes();
-    fetchPlaces();
   }, []);
 
-  const fetchPlaces = async () => {
-    try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/places`);
-      const data = await response.json();
-      setPlaces(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error('Error fetching places:', error);
-      setPlaces([]);
-    }
+  const handleLogin = (userData) => {
+    setUser(userData);
+    setCurrentPage(userData.role === 'admin' ? 'admin' : 'user');
   };
 
-  const handleRouteCreated = () => {
-    fetchRoutes();
+  const handleSignup = (userData) => {
+    setUser(userData);
+    setCurrentPage(userData.role === 'admin' ? 'admin' : 'user');
   };
 
-  const handleRouteDeleted = () => {
-    fetchRoutes();
-    setSelectedRoute(null);
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    localStorage.removeItem('isAuthenticated');
+    setUser(null);
+    setCurrentPage('login');
   };
 
-  const handleRouteUpdated = () => {
-    fetchRoutes();
+  const switchToSignup = () => {
+    setCurrentPage('signup');
   };
 
-  const handleNavigationCalculate = (routeData) => {
-    setNavigationRoute(routeData);
+  const switchToLogin = () => {
+    setCurrentPage('login');
   };
 
-  const handleNavigationClear = () => {
-    setNavigationRoute(null);
-  };
+  // Render appropriate page based on current state
+  if (currentPage === 'login') {
+    return <Login onLogin={handleLogin} onSwitchToSignup={switchToSignup} />;
+  }
 
-  return (
-    <div className="App">
-      <header className="app-header">
-        <h1>SNACO</h1>
-        <div className="header-actions">
-          <button 
-            className="mobile-menu-btn"
-            onClick={() => setIsPanelOpen(!isPanelOpen)}
-            aria-label="Toggle menu"
-          >
-            <span className="menu-icon">⋯</span>
-          </button>
-          <button 
-            className="toggle-panel-btn"
-            onClick={() => setIsPanelOpen(!isPanelOpen)}
-          >
-            {isPanelOpen ? 'Hide' : 'Show'} Routes
-          </button>
-        </div>
-      </header>
-      <div className="app-container">
-        {isPanelOpen && isMobile && (
-          <div 
-            className="sidebar-overlay"
-            onClick={() => setIsPanelOpen(false)}
-          />
-        )}
-        <div className={`sidebar-panel ${isPanelOpen ? '' : 'hidden'}`}>
-          <NavigationPanel
-            onRouteCalculate={handleNavigationCalculate}
-            onClear={handleNavigationClear}
-          />
-          <PlaceCategorizer
-            onPlaceSelect={setSelectedPlace}
-          />
-          <RoutePanel
-            isOpen={true}
-            routes={routes}
-            selectedRoute={selectedRoute}
-            onSelectRoute={setSelectedRoute}
-            onRouteCreated={handleRouteCreated}
-            onRouteDeleted={handleRouteDeleted}
-            onRouteUpdated={handleRouteUpdated}
-            onDrawingModeChange={setIsDrawingRoute}
-            onMapClickCallbackChange={setOnMapClickCallback}
-          />
-        </div>
-        <MapComponent
-          routes={routes}
-          selectedRoute={selectedRoute}
-          onRouteSelect={setSelectedRoute}
-          isDrawingMode={isDrawingRoute}
-          onMapClick={onMapClickCallback}
-          navigationRoute={navigationRoute}
-          onNavigationClear={handleNavigationClear}
-          places={places}
-          onPlaceSelect={setSelectedPlace}
-        />
-        {selectedPlace && (
-          <PlaceDetails
-            place={selectedPlace}
-            onClose={() => setSelectedPlace(null)}
-          />
-        )}
-      </div>
-    </div>
-  );
+  if (currentPage === 'signup') {
+    return <Signup onSignup={handleSignup} onSwitchToLogin={switchToLogin} />;
+  }
+
+  if (currentPage === 'admin' && user) {
+    return <AdminPage user={user} onLogout={handleLogout} />;
+  }
+
+  if (currentPage === 'user' && user) {
+    return <UserPage user={user} onLogout={handleLogout} />;
+  }
+
+  // Fallback to login if somehow no valid state
+  return <Login onLogin={handleLogin} />;
 }
 
 export default App;
-

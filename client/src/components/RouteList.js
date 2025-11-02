@@ -1,7 +1,7 @@
 import React from 'react';
 import './RouteList.css';
 
-const RouteList = ({ routes = [], selectedRoute, onSelectRoute, onEdit, onDelete }) => {
+const RouteList = ({ routes = [], selectedRoute, onSelectRoute, onEdit, onDelete, isAdmin = false }) => {
   // Ensure routes is always an array
   const safeRoutes = Array.isArray(routes) ? routes : [];
   
@@ -27,8 +27,10 @@ const RouteList = ({ routes = [], selectedRoute, onSelectRoute, onEdit, onDelete
   if (safeRoutes.length === 0) {
     return (
       <div className="empty-state">
-        <p>No routes created yet.</p>
-        <p className="empty-state-hint">Click "New Route" to create your first route.</p>
+        <p>No routes available.</p>
+        {isAdmin && (
+          <p className="empty-state-hint">Click "New Route" to create your first route.</p>
+        )}
       </div>
     );
   }
@@ -53,26 +55,28 @@ const RouteList = ({ routes = [], selectedRoute, onSelectRoute, onEdit, onDelete
               {route.waypoints ? route.waypoints.length : 0} waypoint{route.waypoints && route.waypoints.length !== 1 ? 's' : ''}
             </span>
           </div>
-          <div className="route-actions">
-            <button
-              className="btn-edit"
-              onClick={(e) => {
-                e.stopPropagation();
-                onEdit(route);
-              }}
-            >
-              Edit
-            </button>
-            <button
-              className="btn-delete"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDelete(route._id);
-              }}
-            >
-              Delete
-            </button>
-          </div>
+          {isAdmin && (
+            <div className="route-actions">
+              <button
+                className="btn-edit"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(route);
+                }}
+              >
+                Edit
+              </button>
+              <button
+                className="btn-delete"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDelete(route._id);
+                }}
+              >
+                Delete
+              </button>
+            </div>
+          )}
         </div>
       ))}
     </div>
