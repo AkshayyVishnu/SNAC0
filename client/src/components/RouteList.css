@@ -5,24 +5,25 @@
 }
 
 .route-item {
-  border: 2px solid #e5e7eb;
-  border-radius: 8px;
+  border: 2px solid #e8e0f0;
+  border-radius: 12px;
   padding: 1rem;
   cursor: pointer;
-  transition: all 0.2s;
-  background: white;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(5px);
 }
 
 .route-item:hover {
-  border-color: #667eea;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
-  transform: translateY(-2px);
+  border-color: #8b7ab8;
+  box-shadow: 0 6px 20px rgba(139, 122, 184, 0.25);
+  transform: translateY(-3px);
 }
 
 .route-item.selected {
-  border-color: #667eea;
-  background: #f3f4f6;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25);
+  border-color: #8b7ab8;
+  background: linear-gradient(135deg, rgba(139, 122, 184, 0.1) 0%, rgba(107, 91, 149, 0.1) 100%);
+  box-shadow: 0 6px 20px rgba(139, 122, 184, 0.35);
 }
 
 .route-item-header {
@@ -36,29 +37,30 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  border: 2px solid white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 3px solid white;
+  box-shadow: 0 2px 8px rgba(75, 65, 115, 0.3);
   flex-shrink: 0;
 }
 
 .route-name {
   font-size: 1rem;
-  font-weight: 600;
-  color: #111827;
+  font-weight: 700;
+  color: #4a4063;
   margin: 0;
 }
 
 .route-description {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: #6b5b95;
   margin: 0.5rem 0;
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
 .route-meta {
   margin: 0.5rem 0;
   font-size: 0.75rem;
-  color: #9ca3af;
+  color: #8b7ab8;
+  font-weight: 500;
 }
 
 .route-actions {
@@ -66,53 +68,59 @@
   gap: 0.5rem;
   margin-top: 0.75rem;
   padding-top: 0.75rem;
-  border-top: 1px solid #e5e7eb;
+  border-top: 2px solid #d5c9e8;
 }
 
 .btn-edit,
 .btn-delete {
   flex: 1;
   padding: 0.5rem;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
+  border: 2px solid #c5b8d9;
+  border-radius: 8px;
   background: white;
   cursor: pointer;
   font-size: 0.875rem;
-  transition: all 0.2s;
+  font-weight: 600;
+  transition: all 0.3s ease;
 }
 
 .btn-edit {
-  color: #667eea;
-  border-color: #667eea;
+  color: #8b7ab8;
+  border-color: #8b7ab8;
 }
 
 .btn-edit:hover {
-  background: #667eea;
+  background: linear-gradient(135deg, #8b7ab8 0%, #6b5b95 100%);
   color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(139, 122, 184, 0.3);
 }
 
 .btn-delete {
-  color: #ef4444;
-  border-color: #ef4444;
+  color: #c77dbb;
+  border-color: #c77dbb;
 }
 
 .btn-delete:hover {
-  background: #ef4444;
+  background: linear-gradient(135deg, #c77dbb 0%, #a855a8 100%);
   color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(199, 125, 187, 0.3);
 }
 
 .empty-state {
   text-align: center;
   padding: 3rem 1rem;
-  color: #6b7280;
+  color: #8b7ab8;
 }
 
 .empty-state p {
   margin: 0.5rem 0;
+  font-weight: 500;
 }
 
 .empty-state-hint {
   font-size: 0.875rem;
-  color: #9ca3af;
+  color: #9a89a8;
+  font-style: italic;
 }
-

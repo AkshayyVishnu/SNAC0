@@ -11,8 +11,8 @@
 }
 
 .form-group label {
-  font-weight: 500;
-  color: #374151;
+  font-weight: 600;
+  color: #4a4063;
   font-size: 0.875rem;
 }
 
@@ -20,29 +20,39 @@
 .form-group input[type="number"],
 .form-group textarea {
   padding: 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
+  border: 2px solid #c5b8d9;
+  border-radius: 10px;
   font-size: 0.875rem;
-  transition: border-color 0.2s;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.9);
+  color: #4a4063;
 }
 
 .form-group input[type="text"]:focus,
 .form-group input[type="number"]:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #8b7ab8;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(139, 122, 184, 0.1);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 80px;
 }
 
 .form-group input.error,
 .form-group textarea.error {
-  border-color: #ef4444;
+  border-color: #c77dbb;
+  box-shadow: 0 0 0 3px rgba(199, 125, 187, 0.1);
 }
 
 .error-message {
-  color: #ef4444;
+  color: #a855a8;
   font-size: 0.75rem;
   margin-top: -0.25rem;
+  font-weight: 500;
 }
 
 .color-input-group {
@@ -54,9 +64,15 @@
 .color-input-group input[type="color"] {
   width: 50px;
   height: 40px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
+  border: 2px solid #c5b8d9;
+  border-radius: 10px;
   cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.color-input-group input[type="color"]:hover {
+  border-color: #8b7ab8;
+  box-shadow: 0 0 0 3px rgba(139, 122, 184, 0.1);
 }
 
 .color-text-input {
@@ -70,19 +86,22 @@
 }
 
 .btn-add-waypoint {
-  background: #667eea;
+  background: linear-gradient(135deg, #8b7ab8 0%, #6b5b95 100%);
   color: white;
   border: none;
   padding: 0.5rem 1rem;
-  border-radius: 6px;
+  border-radius: 10px;
   cursor: pointer;
   font-size: 0.875rem;
-  font-weight: 500;
-  transition: background 0.2s;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(107, 91, 149, 0.3);
 }
 
 .btn-add-waypoint:hover {
-  background: #5568d3;
+  background: linear-gradient(135deg, #9a89c7 0%, #7a6aa4 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(107, 91, 149, 0.4);
 }
 
 .waypoints-list {
@@ -94,11 +113,36 @@
   padding: 0.5rem 0;
 }
 
+/* Custom scrollbar for waypoints list */
+.waypoints-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.waypoints-list::-webkit-scrollbar-track {
+  background: rgba(197, 184, 217, 0.2);
+  border-radius: 10px;
+}
+
+.waypoints-list::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #8b7ab8 0%, #6b5b95 100%);
+  border-radius: 10px;
+}
+
+.waypoints-list::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #9a89c7 0%, #7a6aa4 100%);
+}
+
 .waypoint-item {
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  border: 2px solid #e8e0f0;
+  border-radius: 12px;
   padding: 1rem;
-  background: #f9fafb;
+  background: linear-gradient(135deg, rgba(139, 122, 184, 0.05) 0%, rgba(107, 91, 149, 0.05) 100%);
+  transition: all 0.3s ease;
+}
+
+.waypoint-item:hover {
+  border-color: #c5b8d9;
+  box-shadow: 0 4px 15px rgba(139, 122, 184, 0.15);
 }
 
 .waypoint-header {
@@ -109,8 +153,8 @@
 }
 
 .waypoint-number {
-  font-weight: 600;
-  color: #374151;
+  font-weight: 700;
+  color: #4a4063;
   font-size: 0.875rem;
 }
 
@@ -121,22 +165,25 @@
 
 .btn-move,
 .btn-remove {
-  width: 24px;
-  height: 24px;
-  border: 1px solid #d1d5db;
+  width: 28px;
+  height: 28px;
+  border: 2px solid #c5b8d9;
   background: white;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   font-size: 0.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
+  color: #8b7ab8;
+  font-weight: 600;
 }
 
 .btn-move:hover:not(:disabled) {
-  background: #f3f4f6;
-  border-color: #667eea;
+  background: rgba(139, 122, 184, 0.1);
+  border-color: #8b7ab8;
+  transform: translateY(-1px);
 }
 
 .btn-move:disabled {
@@ -145,13 +192,15 @@
 }
 
 .btn-remove {
-  color: #ef4444;
-  border-color: #ef4444;
+  color: #c77dbb;
+  border-color: #c77dbb;
 }
 
 .btn-remove:hover {
-  background: #ef4444;
+  background: linear-gradient(135deg, #c77dbb 0%, #a855a8 100%);
   color: white;
+  border-color: #c77dbb;
+  transform: translateY(-1px);
 }
 
 .waypoint-fields {
@@ -162,62 +211,93 @@
 
 .waypoint-fields .field-group {
   gap: 0.25rem;
+  display: flex;
+  flex-direction: column;
 }
 
 .waypoint-fields label {
   font-size: 0.75rem;
-  color: #6b7280;
+  color: #8b7ab8;
+  font-weight: 600;
 }
 
 .waypoint-fields input {
   padding: 0.5rem;
   font-size: 0.875rem;
+  border: 2px solid #c5b8d9;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  transition: all 0.3s ease;
+}
+
+.waypoint-fields input:focus {
+  outline: none;
+  border-color: #8b7ab8;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(139, 122, 184, 0.1);
 }
 
 .form-actions {
   display: flex;
   gap: 0.75rem;
   padding-top: 1rem;
-  border-top: 1px solid #e5e7eb;
+  border-top: 2px solid #d5c9e8;
 }
 
 .btn-cancel,
 .btn-submit {
   flex: 1;
   padding: 0.75rem;
-  border-radius: 6px;
+  border-radius: 10px;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
 }
 
 .btn-cancel {
-  background: white;
-  border: 1px solid #d1d5db;
-  color: #374151;
+  background: rgba(197, 184, 217, 0.3);
+  border: 2px solid #c5b8d9;
+  color: #6b5b95;
 }
 
 .btn-cancel:hover {
-  background: #f9fafb;
-  border-color: #9ca3af;
+  background: rgba(197, 184, 217, 0.5);
+  border-color: #8b7ab8;
+  transform: translateY(-1px);
 }
 
 .btn-submit {
-  background: #667eea;
+  background: linear-gradient(135deg, #8b7ab8 0%, #6b5b95 100%);
   border: none;
   color: white;
+  box-shadow: 0 2px 10px rgba(107, 91, 149, 0.3);
 }
 
 .btn-submit:hover {
-  background: #5568d3;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+  background: linear-gradient(135deg, #9a89c7 0%, #7a6aa4 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(107, 91, 149, 0.4);
+}
+
+.btn-submit:disabled,
+.btn-cancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
 }
 
 @media (max-width: 768px) {
   .waypoint-fields {
     grid-template-columns: 1fr;
   }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .btn-cancel,
+  .btn-submit {
+    width: 100%;
+  }
 }
-

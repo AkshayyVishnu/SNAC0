@@ -1,55 +1,80 @@
 .route-panel {
   width: 100%;
-  background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(75, 65, 115, 0.3);
+  border-radius: 16px;
   display: flex;
   flex-direction: column;
   z-index: 100;
   overflow: hidden;
   flex-shrink: 0;
   min-height: fit-content;
+  border: 1px solid rgba(197, 184, 217, 0.5);
 }
 
 .route-panel-header {
   padding: 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 2px solid rgba(197, 184, 217, 0.5);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #8b7ab8 0%, #6b5b95 100%);
   color: white;
 }
 
 .route-panel-header h2 {
   font-size: 1.25rem;
-  font-weight: 600;
+  font-weight: 700;
+  margin: 0;
 }
 
 .route-panel-header .btn-primary {
   background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.3);
   color: white;
-  padding: 0.4rem 0.8rem;
-  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
   cursor: pointer;
-  font-size: 0.8rem;
-  font-weight: 500;
-  transition: all 0.2s;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
   white-space: nowrap;
   margin-left: auto;
   flex-shrink: 0;
+  backdrop-filter: blur(10px);
 }
 
 .route-panel-header .btn-primary:hover {
   background: rgba(255, 255, 255, 0.3);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
 }
 
 .route-panel-content {
   flex: 1;
   overflow-y: auto;
   padding: 1rem;
+}
+
+/* Custom scrollbar for route panel content */
+.route-panel-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.route-panel-content::-webkit-scrollbar-track {
+  background: rgba(197, 184, 217, 0.2);
+  border-radius: 10px;
+}
+
+.route-panel-content::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #8b7ab8 0%, #6b5b95 100%);
+  border-radius: 10px;
+}
+
+.route-panel-content::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #9a89c7 0%, #7a6aa4 100%);
 }
 
 @media (max-width: 768px) {
@@ -62,10 +87,11 @@
     max-width: 350px;
     transform: translateX(-100%);
     transition: transform 0.3s ease;
+    border-radius: 0 16px 16px 0;
   }
 
   .route-panel.open {
     transform: translateX(0);
+    box-shadow: 4px 0 20px rgba(75, 65, 115, 0.4);
   }
 }
-

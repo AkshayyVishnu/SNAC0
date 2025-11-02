@@ -21,14 +21,23 @@
 .mapboxgl-ctrl-geocoder {
   width: 100%;
   max-width: 400px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  border-radius: 6px;
+  box-shadow: 0 4px 20px rgba(75, 65, 115, 0.3);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
 }
 
 .mapboxgl-ctrl-geocoder input {
   padding: 10px 40px 10px 15px;
   font-size: 14px;
-  border-radius: 6px;
+  border-radius: 12px;
+  border: 2px solid #c5b8d9;
+  transition: all 0.3s ease;
+}
+
+.mapboxgl-ctrl-geocoder input:focus {
+  border-color: #8b7ab8;
+  box-shadow: 0 0 0 3px rgba(139, 122, 184, 0.1);
 }
 
 .mapboxgl-ctrl-geocoder--icon {
@@ -36,12 +45,14 @@
 }
 
 .map-info {
-  background: white;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
   padding: 0.75rem 1rem;
-  border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(75, 65, 115, 0.3);
   font-size: 0.875rem;
-  color: #333;
+  color: #4a4063;
+  border: 1px solid rgba(197, 184, 217, 0.5);
 }
 
 .custom-marker {
@@ -49,53 +60,59 @@
   height: 20px;
   border-radius: 50%;
   border: 3px solid white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 8px rgba(75, 65, 115, 0.4);
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #8b7ab8 0%, #6b5b95 100%);
 }
 
 .custom-marker:hover {
   transform: scale(1.2);
+  box-shadow: 0 4px 15px rgba(107, 91, 149, 0.5);
 }
 
 .custom-marker.selected {
   width: 24px;
   height: 24px;
   border-width: 4px;
-  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 6px 20px rgba(107, 91, 149, 0.6);
+  background: linear-gradient(135deg, #9a89c7 0%, #7a6aa4 100%);
 }
 
 .nav-info-panel {
   position: absolute;
   bottom: 20px;
   right: 20px;
-  background: white;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
   padding: 1rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(75, 65, 115, 0.3);
   z-index: 1000;
   min-width: 200px;
   max-width: 300px;
+  border: 1px solid rgba(197, 184, 217, 0.5);
 }
 
 .nav-info-header {
   font-weight: 600;
   font-size: 1rem;
   margin-bottom: 0.75rem;
-  color: #333;
-  border-bottom: 1px solid #eee;
+  color: #4a4063;
+  border-bottom: 2px solid #d5c9e8;
   padding-bottom: 0.5rem;
 }
 
 .nav-info-item {
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
-  color: #555;
+  color: #6b5b95;
 }
 
 .nav-info-item strong {
-  color: #333;
+  color: #4a4063;
   margin-right: 0.5rem;
+  font-weight: 600;
 }
 
 .nav-info-close {
@@ -106,16 +123,18 @@
   border: none;
   font-size: 1.2rem;
   cursor: pointer;
-  color: #999;
+  color: #8b7ab8;
   padding: 0;
   width: 24px;
   height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.3s ease;
+  border-radius: 6px;
 }
 
 .nav-info-close:hover {
-  color: #333;
+  color: #4a4063;
+  background: rgba(139, 122, 184, 0.1);
 }
-
