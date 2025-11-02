@@ -10,11 +10,6 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.place-categorizer:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(62, 39, 35, 0.18);
-}
-
 .categorizer-header {
   display: flex;
   justify-content: space-between;
@@ -198,6 +193,17 @@
   background: #FFFFFF;
   border-color: #D7C9AA;
   transform: scale(1.1);
+}
+
+.collect-btn {
+  padding: 0.5rem 0.5rem;
+  background:#55483c;
+  color: rgb(255, 255, 255);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 
 .place-item-header {

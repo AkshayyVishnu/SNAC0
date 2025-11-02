@@ -91,9 +91,6 @@ function App() {
           >
             <span className="menu-icon">⋯</span>
           </button>
-            <button 
-            className="bookmarks-btn"
-          >Bookmarks</button>
           <button 
             className="toggle-panel-btn"
             onClick={() => setIsPanelOpen(!isPanelOpen)}

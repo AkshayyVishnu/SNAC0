@@ -167,16 +167,7 @@ const PlaceCategorizer = ({ onPlaceSelect }) => {
           {!isCollectingPlaces ? (
             <button 
               onClick={handleStartCollectingPlaces}
-              style={{
-                padding: '0.5rem 1rem',
-                background: '#FF9800',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontSize: '0.875rem',
-                fontWeight: '500'
-              }}
+              className="collect-btn"
               title="Click on places on the map to collect them"
             >
               📍 Collect from Map
