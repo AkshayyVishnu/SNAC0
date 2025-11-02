@@ -45,6 +45,8 @@ const MapComponent = ({
   const customSearchContainerRef = useRef(null);
   const geocoderRef = useRef(null);
   const searchResultMarkerRef = useRef(null);
+  const userLocationMarkerRef = useRef(null); 
+  const [isLocating, setIsLocating] = useState(false);
 
   useEffect(() => {
     const mapboxToken = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN;
@@ -133,6 +135,43 @@ const MapComponent = ({
     };
   }, []);
 
+  // Replace the second useEffect with this more aggressive version
+// Replace all the resize useEffects with just this ONE simple effect
+useEffect(() => {
+  if (!map.current || !mapLoaded) return;
+  
+  const resizeMap = () => {
+    if (map.current) {
+      map.current.resize();
+    }
+  };
+
+  // Create a MutationObserver to watch for style changes on the parent container
+  const observer = new MutationObserver(() => {
+    resizeMap();
+    // Call resize multiple times with small delays
+    setTimeout(resizeMap, 50);
+    setTimeout(resizeMap, 150);
+    setTimeout(resizeMap, 300);
+  });
+
+  // Watch the app-container for class changes (when sidebar-hidden is added/removed)
+  const appContainer = document.querySelector('.app-container');
+  if (appContainer) {
+    observer.observe(appContainer, { 
+      attributes: true, 
+      attributeFilter: ['class'] 
+    });
+  }
+
+  // Also watch for resize events
+  window.addEventListener('resize', resizeMap);
+
+  return () => {
+    observer.disconnect();
+    window.removeEventListener('resize', resizeMap);
+  };
+}, [mapLoaded]);
   useEffect(() => {
     const performSearch = async () => {
       if (!searchQuery || searchQuery.length < 2) {
@@ -236,6 +275,97 @@ const MapComponent = ({
     setSearchQuery("");
     setShowSearchSuggestions(false);
   }, []);
+
+  const handleGetUserLocation = useCallback(() => {
+  if (!map.current || !mapLoaded) return;
+
+  setIsLocating(true);
+
+  if (!navigator.geolocation) {
+    alert("Geolocation is not supported by your browser");
+    setIsLocating(false);
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const { latitude, longitude } = position.coords;
+
+      if (userLocationMarkerRef.current) {
+        userLocationMarkerRef.current.remove();
+      }
+
+      const el = document.createElement("div");
+      el.className = "user-location-marker";
+      el.innerHTML = `
+        <div style="
+          width: 20px;
+          height: 20px;
+          background: #4285F4;
+          border: 3px solid white;
+          border-radius: 50%;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+          position: relative;
+        ">
+          <div style="
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: rgba(66, 133, 244, 0.2);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: pulse 2s infinite;
+          "></div>
+        </div>
+      `;
+
+      const marker = new mapboxgl.Marker(el)
+        .setLngLat([longitude, latitude])
+        .setPopup(
+          new mapboxgl.Popup({ offset: 25 }).setHTML(
+            "<strong>📍 Your Location</strong>"
+          )
+        )
+        .addTo(map.current);
+
+      userLocationMarkerRef.current = marker;
+
+      map.current.flyTo({
+        center: [longitude, latitude],
+        zoom: 16,
+        duration: 1500,
+      });
+
+      setIsLocating(false);
+    },
+    (error) => {
+      console.error("Error getting location:", error);
+      let errorMessage = "Unable to retrieve your location";
+      
+      switch(error.code) {
+        case error.PERMISSION_DENIED:
+          errorMessage = "Location access denied. Please enable location permissions.";
+          break;
+        case error.POSITION_UNAVAILABLE:
+          errorMessage = "Location information unavailable.";
+          break;
+        case error.TIMEOUT:
+          errorMessage = "Location request timed out.";
+          break;
+      }
+      
+      alert(errorMessage);
+      setIsLocating(false);
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0,
+    }
+  );
+}, [mapLoaded]);
 
   useEffect(() => {
     if (!customSearchContainerRef.current || !mapLoaded) return;

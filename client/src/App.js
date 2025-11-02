@@ -91,6 +91,9 @@ function App() {
           >
             <span className="menu-icon">⋯</span>
           </button>
+            <button 
+            className="bookmarks-btn"
+          >Bookmarks</button>
           <button 
             className="toggle-panel-btn"
             onClick={() => setIsPanelOpen(!isPanelOpen)}
@@ -99,7 +102,7 @@ function App() {
           </button>
         </div>
       </header>
-      <div className={`app-container ${isPanelOpen ? '' : 'sidebar-hidden'}`}>
+      <div className="app-container">
         {isPanelOpen && isMobile && (
           <div 
             className="sidebar-overlay"
@@ -126,9 +129,8 @@ function App() {
             onMapClickCallbackChange={setOnMapClickCallback}
           />
         </div>
-        <div style={{ flexGrow: 1 }}>
-          <MapComponent
-            routes={routes}
+        <MapComponent
+          routes={routes}
           selectedRoute={selectedRoute}
           onRouteSelect={setSelectedRoute}
           isDrawingMode={isDrawingRoute}
@@ -138,7 +140,6 @@ function App() {
           places={places}
           onPlaceSelect={setSelectedPlace}
         />
-      </div>
         {selectedPlace && (
           <PlaceDetails
             place={selectedPlace}
