@@ -13,6 +13,7 @@ const NavigationPanel = ({ onRouteCalculate, onClear }) => {
   const [showEndSuggestions, setShowEndSuggestions] = useState(false);
   const [places, setPlaces] = useState([]); // Local college places from database
   const searchTimeoutRef = useRef({ start: null, end: null });
+  const canUseGeo = typeof navigator !== 'undefined' && !!navigator.geolocation;
 
   const handleCalculateRoute = () => {
     if (!startLocation.lng || !startLocation.lat || !endLocation.lng || !endLocation.lat) {
@@ -31,6 +32,39 @@ const NavigationPanel = ({ onRouteCalculate, onClear }) => {
     setStartLocation({ name: '', lng: null, lat: null });
     setEndLocation({ name: '', lng: null, lat: null });
     onClear();
+  };
+
+  const getCurrentPositionOnce = () =>
+    new Promise((resolve, reject) => {
+      if (!canUseGeo) {
+        reject(new Error('Geolocation not supported'));
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        (pos) => resolve(pos),
+        (err) => reject(err),
+        { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 }
+      );
+    });
+
+  const handleUseMyLocation = async (type) => {
+    try {
+      const pos = await getCurrentPositionOnce();
+      const { latitude, longitude } = pos.coords;
+      const loc = { name: 'My location', lat: latitude, lng: longitude };
+      if (type === 'start') {
+        setStartLocation(loc);
+        setShowStartSuggestions(false);
+        setStartSuggestions([]);
+      } else {
+        setEndLocation(loc);
+        setShowEndSuggestions(false);
+        setEndSuggestions([]);
+      }
+    } catch (e) {
+      console.error('Could not get current position:', e);
+      alert('Could not get your current location. Please ensure permissions are allowed and try again.');
+    }
   };
 
   const handleSetFromMap = (type) => {
@@ -284,62 +318,70 @@ const NavigationPanel = ({ onRouteCalculate, onClear }) => {
                 }, 300);
               }}
               onFocus={(e) => {
-                // Show all places when focusing on empty input
-                if (!startLocation.name.trim()) {
-                  handleLocationSearch('start', '');
-                } else {
-                  // If there's already text, search with it
-                  handleLocationSearch('start', startLocation.name);
-                }
-                // Show suggestions if we have any
-                setTimeout(() => {
-                  if (startSuggestions.length > 0) {
-                    setShowStartSuggestions(true);
-                  }
-                }, 100);
-              }}
-              onBlur={() => {
-                // Delay to allow suggestion click
-                setTimeout(() => {
-                  setShowStartSuggestions(false);
-                }, 250);
-              }}
-            />
-            <button
-              className={`btn-set-location ${isSettingStart ? 'active' : ''}`}
-              onClick={() => handleSetFromMap('start')}
-              title="Click on map to set start"
-            >
-              🖱️
-            </button>
-            {showStartSuggestions && startSuggestions.length > 0 && (
-              <div className="suggestions-dropdown" style={{ zIndex: 1000 }}>
-                {startSuggestions.map((suggestion, idx) => (
-                  <div
-                    key={idx}
-                    className={`suggestion-item ${suggestion.isLocal ? 'local-place' : ''}`}
-                    onClick={() => handleSelectSuggestion('start', suggestion)}
-                  >
-                    <div className="suggestion-name">
-                      {suggestion.isLocal && '🏫 '}
-                      {suggestion.name}
-                    </div>
-                    {suggestion.context && (
-                      <div className="suggestion-context">{suggestion.context}</div>
-                    )}
-                    {suggestion.description && (
-                      <div className="suggestion-desc">{suggestion.description.substring(0, 60)}...</div>
-                    )}
-                  </div>
-                ))}
+            // Show all places when focusing on empty input
+            if (!startLocation.name.trim()) {
+              handleLocationSearch('start', '');
+            } else {
+              // If there's already text, search with it
+              handleLocationSearch('start', startLocation.name);
+            }
+            // Show suggestions if we have any
+            setTimeout(() => {
+              // Always show to allow 'My live location' option even when no other suggestions
+              setShowStartSuggestions(true);
+            }, 100);
+          }}
+          onBlur={() => {
+            // Delay to allow suggestion click
+            setTimeout(() => {
+              setShowStartSuggestions(false);
+            }, 250);
+          }}
+        />
+        <button
+          className={`btn-set-location ${isSettingStart ? 'active' : ''}`}
+          onClick={() => handleSetFromMap('start')}
+          title="Click on map to set start"
+        >
+          🖱️
+        </button>
+        {showStartSuggestions && (
+          <div className="suggestions-dropdown" style={{ zIndex: 1000 }}>
+            {canUseGeo && (
+              <div
+                className="suggestion-item local-place"
+                onClick={() => handleUseMyLocation('start')}
+              >
+                <div className="suggestion-name" style={{ color: '#16a34a', fontWeight: 600 }}>📍 My live location</div>
+                <div className="suggestion-context">Use your current position</div>
               </div>
             )}
+            {startSuggestions.map((suggestion, idx) => (
+              <div
+                key={idx}
+                className={`suggestion-item ${suggestion.isLocal ? 'local-place' : ''}`}
+                onClick={() => handleSelectSuggestion('start', suggestion)}
+              >
+                <div className="suggestion-name">
+                  {suggestion.isLocal && '🏫 '}
+                  {suggestion.name}
+                </div>
+                {suggestion.context && (
+                  <div className="suggestion-context">{suggestion.context}</div>
+                )}
+                {suggestion.description && (
+                  <div className="suggestion-desc">{suggestion.description.substring(0, 60)}...</div>
+                )}
+              </div>
+            ))}
           </div>
-          {startLocation.lng && (
-            <div className="location-coords">
-              {startLocation.lat.toFixed(4)}, {startLocation.lng.toFixed(4)}
-            </div>
-          )}
+        )}
+        </div>
+        {startLocation.lng && (
+          <div className="location-coords">
+            {startLocation.lat.toFixed(4)}, {startLocation.lng.toFixed(4)}
+          </div>
+        )}
         </div>
 
         <div className="nav-input-group">
@@ -374,9 +416,8 @@ const NavigationPanel = ({ onRouteCalculate, onClear }) => {
                 }
                 // Show suggestions if we have any
                 setTimeout(() => {
-                  if (endSuggestions.length > 0) {
-                    setShowEndSuggestions(true);
-                  }
+                  // Always show to allow 'My live location' option even when no other suggestions
+                  setShowEndSuggestions(true);
                 }, 100);
               }}
               onBlur={() => {
@@ -393,8 +434,17 @@ const NavigationPanel = ({ onRouteCalculate, onClear }) => {
             >
               🖱️
             </button>
-            {showEndSuggestions && endSuggestions.length > 0 && (
+            {showEndSuggestions && (
               <div className="suggestions-dropdown" style={{ zIndex: 1000 }}>
+                {canUseGeo && (
+                  <div
+                    className="suggestion-item local-place"
+                    onClick={() => handleUseMyLocation('end')}
+                  >
+                    <div className="suggestion-name" style={{ color: '#16a34a', fontWeight: 600 }}>📍 My live location</div>
+                    <div className="suggestion-context">Use your current position</div>
+                  </div>
+                )}
                 {endSuggestions.map((suggestion, idx) => (
                   <div
                     key={idx}
