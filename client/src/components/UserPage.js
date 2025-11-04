@@ -68,7 +68,7 @@ const UserPage = ({ user, onLogout }) => {
       <header className="app-header">
         <h1>SNACO</h1>
         <div className="header-actions">
-          <span className="user-info">Logged in as: {user.username}</span>
+          <span className="user-info">USER: {user.username}</span>
           <button 
             className="logout-btn"
             onClick={onLogout}

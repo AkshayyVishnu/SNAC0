@@ -45,6 +45,12 @@ const MapComponent = ({
   const customSearchContainerRef = useRef(null);
   const geocoderRef = useRef(null);
   const searchResultMarkerRef = useRef(null);
+  const userLocationMarkerRef = useRef(null);
+  const userAccuracySourceIdRef = useRef("user-accuracy-circle");
+  const userWatchIdRef = useRef(null);
+  const liveLocationActiveRef = useRef(false);
+  const liveLocationButtonRef = useRef(null);
+  const firstFixRef = useRef(true);
 
   useEffect(() => {
     const mapboxToken = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN;
@@ -245,12 +251,17 @@ const MapComponent = ({
     if (!container.querySelector("#map-search-input")) {
       container.innerHTML = `
         <div style="position: relative; width: 100%;">
-          <input
-            type="text"
-            id="map-search-input"
-            placeholder="🔍 Search for places on campus..."
-            style="width: 100%; padding: 10px 15px; font-size: 14px; border: 2px solid #ddd; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); outline: none; transition: border-color 0.2s;"
-          />
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <input
+              type="text"
+              id="map-search-input"
+              placeholder="🔍 Search for places on campus..."
+              style="flex: 1; padding: 10px 15px; font-size: 14px; border: 2px solid #ddd; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); outline: none; transition: border-color 0.2s;"
+            />
+            <button id="live-location-btn" title="Toggle live location" style="
+              padding: 10px 12px; border: 2px solid #ddd; border-radius: 6px; background: white; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            ">📍</button>
+          </div>
           <div id="map-search-suggestions-container"></div>
         </div>
       `;
@@ -269,6 +280,17 @@ const MapComponent = ({
         input.addEventListener("blur", () => {
           input.style.borderColor = "#ddd";
           setTimeout(() => setShowSearchSuggestions(false), 250);
+        });
+      }
+
+      const btn = container.querySelector("#live-location-btn");
+      if (btn) {
+        liveLocationButtonRef.current = btn;
+        // Prevent map click side-effects
+        btn.addEventListener("mousedown", (e) => e.stopPropagation());
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          toggleLiveLocation();
         });
       }
     }
@@ -389,6 +411,196 @@ const MapComponent = ({
     handleSearchSelect,
   ]);
 
+  const updateLiveButtonVisual = useCallback(() => {
+    const btn = liveLocationButtonRef.current;
+    if (!btn) return;
+    if (liveLocationActiveRef.current) {
+      btn.style.borderColor = "#16a34a";
+      btn.style.background = "#dcfce7";
+      btn.textContent = "📡";
+      btn.title = "Live location: ON";
+    } else {
+      btn.style.borderColor = "#ddd";
+      btn.style.background = "white";
+      btn.textContent = "📍";
+      btn.title = "Toggle live location";
+    }
+  }, []);
+
+  const metersToLngLatDelta = (lng, lat, meters, bearingDeg) => {
+    const R = 6378137; // meters
+    const d = meters / R;
+    const brng = (bearingDeg * Math.PI) / 180;
+    const lat1 = (lat * Math.PI) / 180;
+    const lng1 = (lng * Math.PI) / 180;
+    const lat2 = Math.asin(
+      Math.sin(lat1) * Math.cos(d) + Math.cos(lat1) * Math.sin(d) * Math.sin(brng)
+    );
+    const lng2 =
+      lng1 +
+      Math.atan2(
+        Math.sin(brng) * Math.sin(d) * Math.cos(lat1),
+        Math.cos(d) - Math.sin(lat1) * Math.sin(lat2)
+      );
+    return [(lng2 * 180) / Math.PI, (lat2 * 180) / Math.PI];
+  };
+
+  const buildAccuracyCircle = (centerLng, centerLat, radiusMeters = 25, points = 64) => {
+    const coords = [];
+    for (let i = 0; i <= points; i++) {
+      const bearing = (i / points) * 360;
+      const [lng, lat] = metersToLngLatDelta(centerLng, centerLat, radiusMeters, bearing);
+      coords.push([lng, lat]);
+    }
+    return {
+      type: "Feature",
+      geometry: {
+        type: "Polygon",
+        coordinates: [coords],
+      },
+      properties: {},
+    };
+  };
+
+  const stopLiveLocation = useCallback(() => {
+    if (userWatchIdRef.current !== null && navigator.geolocation) {
+      try {
+        navigator.geolocation.clearWatch(userWatchIdRef.current);
+      } catch (e) {}
+      userWatchIdRef.current = null;
+    }
+    if (userLocationMarkerRef.current) {
+      try { userLocationMarkerRef.current.remove(); } catch (e) {}
+      userLocationMarkerRef.current = null;
+    }
+    if (map.current && mapLoaded) {
+      const srcId = userAccuracySourceIdRef.current;
+      if (map.current.getLayer(srcId)) {
+        try { map.current.removeLayer(srcId); } catch (e) {}
+      }
+      if (map.current.getSource(srcId)) {
+        try { map.current.removeSource(srcId); } catch (e) {}
+      }
+    }
+    liveLocationActiveRef.current = false;
+    updateLiveButtonVisual();
+  }, [mapLoaded, updateLiveButtonVisual]);
+
+  const startLiveLocation = useCallback(() => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser.");
+      return;
+    }
+    if (!map.current || !mapLoaded) return;
+
+    const onError = (err) => {
+      console.error("Geolocation error:", err);
+      let msg = "Unable to access your location.";
+      if (err && typeof err.code === "number") {
+        switch (err.code) {
+          case 1:
+            msg = "Location is blocked. Click the lock icon in the address bar and allow Location, then reload.";
+            break;
+          case 2:
+            msg = "Location unavailable. Check network/GPS and try again near a window.";
+            break;
+          case 3:
+            msg = "Getting your location timed out. Please try again.";
+            break;
+          default:
+            msg = err.message || msg;
+        }
+      } else if (err && err.message) {
+        msg = err.message;
+      }
+      alert(msg);
+      stopLiveLocation();
+    };
+
+    const onUpdate = (pos) => {
+      const { latitude, longitude, accuracy } = pos.coords;
+      // Update marker
+      if (!userLocationMarkerRef.current) {
+        const el = document.createElement("div");
+        el.style.width = "16px";
+        el.style.height = "16px";
+        el.style.borderRadius = "50%";
+        el.style.background = "#1e40af";
+        el.style.border = "3px solid white";
+        el.style.boxShadow = "0 2px 8px rgba(0,0,0,0.3)";
+        el.title = "You are here";
+        userLocationMarkerRef.current = new mapboxgl.Marker(el).setLngLat([longitude, latitude]).addTo(map.current);
+      } else {
+        userLocationMarkerRef.current.setLngLat([longitude, latitude]);
+      }
+
+      // Update accuracy circle
+      const sourceId = userAccuracySourceIdRef.current;
+      const feature = buildAccuracyCircle(longitude, latitude, Math.max(accuracy, 15));
+      if (!map.current.getSource(sourceId)) {
+        map.current.addSource(sourceId, {
+          type: "geojson",
+          data: feature,
+        });
+        map.current.addLayer({
+          id: sourceId,
+          type: "fill",
+          source: sourceId,
+          paint: {
+            "fill-color": "#3b82f6",
+            "fill-opacity": 0.15,
+          },
+        });
+        map.current.addLayer({
+          id: sourceId + "-outline",
+          type: "line",
+          source: sourceId,
+          paint: {
+            "line-color": "#3b82f6",
+            "line-width": 2,
+            "line-opacity": 0.5,
+          },
+        });
+      } else {
+        map.current.getSource(sourceId).setData(feature);
+      }
+
+      // Center once on first fix for clarity
+      if (firstFixRef.current && map.current) {
+        firstFixRef.current = false;
+        map.current.easeTo({ center: [longitude, latitude], duration: 800, zoom: Math.max(map.current.getZoom(), 16) });
+      }
+      // Keep user in view without constant recentering
+      if (liveLocationActiveRef.current && map.current) {
+        const bounds = map.current.getBounds();
+        if (!bounds.contains([longitude, latitude])) {
+          map.current.easeTo({ center: [longitude, latitude], duration: 800, zoom: Math.max(map.current.getZoom(), 16) });
+        }
+      }
+    };
+
+    try {
+      const watchId = navigator.geolocation.watchPosition(onUpdate, onError, {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 20000,
+      });
+      userWatchIdRef.current = watchId;
+      liveLocationActiveRef.current = true;
+      updateLiveButtonVisual();
+    } catch (e) {
+      onError(e);
+    }
+  }, [mapLoaded, updateLiveButtonVisual, stopLiveLocation]);
+
+  const toggleLiveLocation = useCallback(() => {
+    if (liveLocationActiveRef.current) {
+      stopLiveLocation();
+    } else {
+      startLiveLocation();
+    }
+  }, [startLiveLocation, stopLiveLocation]);
+
   useEffect(() => {
     if (!map.current || !mapLoaded) return;
 
@@ -467,6 +679,8 @@ const MapComponent = ({
         map.current.getCanvas().style.cursor = "";
         mapClickHandlerRef.current = null;
       }
+      // Ensure live location is stopped when cleaning up map listeners
+      stopLiveLocation();
     };
   }, [isDrawingMode, onMapClick, mapLoaded]);
 

@@ -84,7 +84,7 @@ const AdminPage = ({ user, onLogout }) => {
       <header className="app-header">
         <h1>SNACO - Admin</h1>
         <div className="header-actions">
-          <span className="user-info">Logged in as: {user.username} (Admin)</span>
+          <span className="user-info"> USER: {user.username} (Admin)</span>
           <button 
             className="logout-btn"
             onClick={onLogout}
